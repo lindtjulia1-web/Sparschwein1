@@ -30,7 +30,7 @@
             transition: 0.3s; 
             background-size: cover; 
             background-position: center;
-            box-shadow: 0 0 30px rgba(249, 224, 118, 0.3); 
+            /* Тень теперь управляется через JS для неона */
         }
         iframe { width: 100%; height: 100%; border: none; }
         
@@ -40,8 +40,22 @@
         .color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         input[type="color"] { height: 35px; padding: 2px; cursor: pointer; }
 
-        @keyframes billboard { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.2); box-shadow: 0 0 50px rgba(249, 224, 118, 0.5); } }
-        .anim-border { animation: billboard 3s infinite ease-in-out; }
+        /* Эффект перелива для превью */
+        .shimmer-effect::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.4) 50%, transparent 70%);
+            background-size: 200% 100%;
+            animation: shimmerMove 3s infinite linear;
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        @keyframes shimmerMove {
+            0% { background-position: 100% 0; }
+            100% { background-position: -100% 0; }
+        }
     </style>
 </head>
 <body>
@@ -55,6 +69,18 @@
         </div>
         <label>Фон (URL)</label>
         <input type="text" id="bg-url" placeholder="URL картинки">
+
+        <h2>Эффекты Виджета</h2>
+        <label>Закругление углов</label>
+        <input type="range" id="borderRadius" min="0" max="100" value="30">
+        
+        <label>Цвет Неонового Свечения</label>
+        <input type="color" id="neon-color" value="#f9e076">
+        
+        <div style="margin-top: 10px; display: flex; align-items: center;">
+            <input type="checkbox" id="shimmer-check" checked style="width: 20px; margin: 0 10px 0 0;">
+            <label style="margin:0; color:#fff;">Эффект Блеска (Билборд)</label>
+        </div>
 
         <h2>Тексты и Локализация</h2>
         <label>Заголовок старта</label>
@@ -79,10 +105,7 @@
         </div>
 
         <h2>Оформление</h2>
-        <div class="color-grid">
-            <div><label>Размер текста %</label><input type="range" id="fontSize" min="2" max="8" step="0.1" value="4.5"></div>
-            <div><label>Углы экрана/кнопок</label><input type="range" id="borderRadius" min="0" max="100" value="30"></div>
-        </div>
+        <label>Размер текста %</label><input type="range" id="fontSize" min="2" max="8" step="0.1" value="4.5">
         <label>Цвет кнопок ответов</label>
         <input type="color" id="btn-color" value="#f9e076">
 
@@ -103,7 +126,7 @@
 </div>
 
 <div class="preview">
-    <div id="device-wrapper" class="anim-border"><iframe id="ifr"></iframe></div>
+    <div id="device-wrapper"><iframe id="ifr"></iframe></div>
 </div>
 
 <div id="code-modal">
@@ -158,26 +181,38 @@ function buildInnerGame() {
         pv: document.getElementById('padV').value,
         ph: document.getElementById('padH').value,
         lang: document.getElementById('lang').value,
+        neon: document.getElementById('neon-color').value,
+        shimmer: document.getElementById('shimmer-check').checked,
         levels: levels,
         pigs: [GITHUB_RAW+"1.png", GITHUB_RAW+"2.png", GITHUB_RAW+"3.png", GITHUB_RAW+"4.png"],
         coin: GITHUB_RAW+"5.png"
     };
 
+    // CSS для перелива внутри виджета
+    const shimmerCSS = cfg.shimmer ? `
+        body::after {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
+            background-size: 200% 100%; animation: shimmerMove 4s infinite linear; pointer-events: none; z-index: 999;
+        }
+        @keyframes shimmerMove { 0% { background-position: 150% 0; } 100% { background-position: -150% 0; } }
+    ` : '';
+
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
     <style>
-        body { margin:0; height:100vh; overflow:hidden; font-family:${cfg.ff}; background:#000; color:#fff; display:flex; flex-direction:column; border-radius:${cfg.br}px; }
+        body { margin:0; height:100vh; overflow:hidden; font-family:${cfg.ff}; background:#000; color:#fff; display:flex; flex-direction:column; border-radius:${cfg.br}px; position: relative; }
         .bg { position:fixed; inset:0; background:url(${cfg.bg}) center/cover; opacity:0.5; z-index:-1; }
         #game { height:100%; display:flex; flex-direction:column; padding:${cfg.pv}vmin ${cfg.ph}vmin; box-sizing:border-box; }
         .score-box { font-size:10vmin; color:#f9e076; font-weight:900; text-align:center; text-shadow: 0 0 15px rgba(249, 224, 118, 0.5); }
         #pile-box { flex:1; position:relative; display:flex; justify-content:center; align-items:center; }
         .pig { width:75vmin; height:auto; z-index:5; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8)); object-fit: contain; }
         
-        /* ГОРКА МОНЕТОК */
-        .coins-container { position:absolute; bottom:28%; width:30vmin; height:15vmin; z-index:4; display:flex; justify-content:center; }
-        .coin-element { position:absolute; width:12vmin; height:12vmin; background:url(${cfg.coin}) center/cover no-repeat; filter: brightness(1.2) drop-shadow(0 0 5px gold); }
+        /* ОБЛАСТЬ ВНУТРИ СВИНКИ */
+        .coins-container { position:absolute; bottom:25%; width:40vmin; height:25vmin; z-index:4; display:flex; justify-content:center; }
+        .coin-element { position:absolute; width:6vmin; height:6vmin; background:url(${cfg.coin}) center/cover no-repeat; filter: brightness(1.2) drop-shadow(0 0 3px gold); }
         
         /* ПАДАЮЩАЯ МОНЕТКА */
-        .falling-coin { position:absolute; top:-20vh; width:16vmin; height:16vmin; background:url(${cfg.coin}) center/cover no-repeat; z-index:10; filter: drop-shadow(0 0 10px gold); }
+        .falling-coin { position:absolute; top:-20vh; width:8vmin; height:8vmin; background:url(${cfg.coin}) center/cover no-repeat; z-index:10; filter: drop-shadow(0 0 10px gold); }
         
         .ui { min-height:40%; display:flex; flex-direction:column; justify-content:flex-end; }
         .q-text { font-size:${cfg.fz}vmin; text-align:center; margin-bottom:4vmin; font-weight:bold; min-height:3em; display:flex; align-items:center; justify-content:center; }
@@ -186,7 +221,8 @@ function buildInnerGame() {
         button:hover { transform: scale(1.02); }
         .screen { position:absolute; inset:0; background:rgba(0,0,0,0.9); z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:5vmin; border-radius:${cfg.br}px; }
         
-        @keyframes fallIn { 0% { top:-20vh; opacity:1; transform: rotate(0deg) scale(1.2); } 100% { top: 40%; transform: rotate(360deg) scale(0.6); opacity: 0; } }
+        @keyframes fallIn { 0% { top:-20vh; opacity:1; transform: rotate(0deg) scale(1.2); } 100% { top: 45%; transform: rotate(360deg) scale(0.6); opacity: 0; } }
+        ${shimmerCSS}
     </style></head><body>
         <div class="bg"></div>
         <div id="game">
@@ -265,7 +301,7 @@ function buildInnerGame() {
                 setTimeout(() => {
                     const c = document.createElement('div');
                     c.className = 'falling-coin';
-                    c.style.left = (42 + Math.random()*16) + '%';
+                    c.style.left = (46 + Math.random()*8) + '%';
                     c.style.animation = 'fallIn 1.2s ease-in forwards';
                     document.body.appendChild(c);
                     setTimeout(() => { c.remove(); addToPile(); }, 1100);
@@ -277,12 +313,13 @@ function buildInnerGame() {
             const p = document.getElementById('pile');
             const c = document.createElement('div');
             c.className = 'coin-element';
-            const x = (Math.random() * 10 - 5); 
-            const y = (p.children.length * 0.4); 
+            // Случайное распределение по ширине и высоте контейнера "брюшка"
+            const x = (Math.random() * 30 - 15); 
+            const y = (Math.random() * 15); 
             c.style.left = 'calc(50% + ' + x + 'vmin)';
             c.style.bottom = y + 'vmin';
             c.style.transform = 'translate(-50%, 0) rotate(' + (Math.random()*360) + 'deg)';
-            c.style.zIndex = p.children.length;
+            c.style.zIndex = Math.floor(Math.random() * 10);
             p.appendChild(c);
         }
 
@@ -301,16 +338,25 @@ function buildInnerGame() {
 function updatePreview() {
     const wrapper = document.getElementById('device-wrapper');
     const br = document.getElementById('borderRadius').value + 'px';
+    const neon = document.getElementById('neon-color').value;
+    const shimmer = document.getElementById('shimmer-check').checked;
+    
     wrapper.style.width = document.getElementById('width').value + 'px';
     wrapper.style.height = document.getElementById('height').value + 'px';
     wrapper.style.borderRadius = br;
+    wrapper.style.boxShadow = `0 0 20px ${neon}, 0 0 60px ${neon}`;
+    
+    if (shimmer) wrapper.classList.add('shimmer-effect');
+    else wrapper.classList.remove('shimmer-effect');
+
     document.getElementById('ifr').srcdoc = buildInnerGame();
 }
 
 function getGeniallyCode() {
     const html = buildInnerGame().replace(/"/g, '&quot;');
     const br = document.getElementById('borderRadius').value + 'px';
-    const code = `<iframe width="100%" height="100%" srcdoc="${html}" frameborder="0" scrolling="no" style="overflow:hidden;border-radius:${br};box-shadow: 0 0 30px rgba(249, 224, 118, 0.4);"></iframe>`;
+    const neon = document.getElementById('neon-color').value;
+    const code = `<iframe width="100%" height="100%" srcdoc="${html}" frameborder="0" scrolling="no" style="overflow:hidden;border-radius:${br};box-shadow: 0 0 20px ${neon}, 0 0 60px ${neon};"></iframe>`;
     document.getElementById('result-code').value = code;
     document.getElementById('code-modal').style.display = 'flex';
 }
