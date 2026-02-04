@@ -160,7 +160,6 @@ function buildInnerGame() {
         lang: document.getElementById('lang').value,
         levels: levels,
         pigs: [GITHUB_RAW+"1.png", GITHUB_RAW+"2.png", GITHUB_RAW+"3.png", GITHUB_RAW+"4.png"],
-        overlay: GITHUB_RAW + "1.1.png",
         coin: GITHUB_RAW+"5.png"
     };
 
@@ -169,16 +168,18 @@ function buildInnerGame() {
         body { margin:0; height:100vh; overflow:hidden; font-family:${cfg.ff}; background:#000; color:#fff; display:flex; flex-direction:column; border-radius:${cfg.br}px; }
         .bg { position:fixed; inset:0; background:url(${cfg.bg}) center/cover; opacity:0.5; z-index:-1; }
         #game { height:100%; display:flex; flex-direction:column; padding:${cfg.pv}vmin ${cfg.ph}vmin; box-sizing:border-box; }
-        .score-box { font-size:10vmin; color:#f9e076; font-weight:900; text-align:center; text-shadow: 0 0 15px rgba(249, 224, 118, 0.5); z-index: 20; }
+        .score-box { font-size:10vmin; color:#f9e076; font-weight:900; text-align:center; text-shadow: 0 0 15px rgba(249, 224, 118, 0.5); }
         #pile-box { flex:1; position:relative; display:flex; justify-content:center; align-items:center; }
-        .pig { width:75vmin; height:auto; z-index:3; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8)); object-fit: contain; }
-        .pig-overlay { position:absolute; width:75vmin; height:auto; z-index:6; pointer-events:none; object-fit: contain; }
+        .pig { width:75vmin; height:auto; z-index:5; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8)); object-fit: contain; }
         
+        /* ГОРКА МОНЕТОК */
         .coins-container { position:absolute; bottom:28%; width:30vmin; height:15vmin; z-index:4; display:flex; justify-content:center; }
         .coin-element { position:absolute; width:12vmin; height:12vmin; background:url(${cfg.coin}) center/cover no-repeat; filter: brightness(1.2) drop-shadow(0 0 5px gold); }
-        .falling-coin { position:absolute; top:-20vh; width:16vmin; height:16vmin; background:url(${cfg.coin}) center/cover no-repeat; z-index:5; filter: drop-shadow(0 0 10px gold); }
         
-        .ui { min-height:40%; display:flex; flex-direction:column; justify-content:flex-end; z-index: 20; }
+        /* ПАДАЮЩАЯ МОНЕТКА */
+        .falling-coin { position:absolute; top:-20vh; width:16vmin; height:16vmin; background:url(${cfg.coin}) center/cover no-repeat; z-index:10; filter: drop-shadow(0 0 10px gold); }
+        
+        .ui { min-height:40%; display:flex; flex-direction:column; justify-content:flex-end; }
         .q-text { font-size:${cfg.fz}vmin; text-align:center; margin-bottom:4vmin; font-weight:bold; min-height:3em; display:flex; align-items:center; justify-content:center; }
         .btn-grid { display:grid; gap:2vmin; }
         button { border:none; background:${cfg.btnCol}; color:#000; padding:3vmin; border-radius:${cfg.br}px; cursor:pointer; font-weight:bold; font-size:4vmin; transition: 0.2s; }
@@ -196,7 +197,6 @@ function buildInnerGame() {
             <div class="score-box" id="total-score">0</div>
             <div id="pile-box">
                 <img id="pig-img" src="${cfg.pigs[0]}" class="pig">
-                <img src="${cfg.overlay}" class="pig-overlay">
                 <div class="coins-container" id="pile"></div>
             </div>
             <div class="ui">
@@ -267,7 +267,7 @@ function buildInnerGame() {
                     c.className = 'falling-coin';
                     c.style.left = (42 + Math.random()*16) + '%';
                     c.style.animation = 'fallIn 1.2s ease-in forwards';
-                    document.getElementById('pile-box').appendChild(c);
+                    document.body.appendChild(c);
                     setTimeout(() => { c.remove(); addToPile(); }, 1100);
                 }, i * 150);
             }
