@@ -30,7 +30,6 @@
             transition: 0.3s; 
             background-size: cover; 
             background-position: center;
-            /* Тень теперь управляется через JS для неона */
         }
         iframe { width: 100%; height: 100%; border: none; }
         
@@ -39,23 +38,6 @@
         
         .color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         input[type="color"] { height: 35px; padding: 2px; cursor: pointer; }
-
-        /* Эффект перелива для превью */
-        .shimmer-effect::after {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.4) 50%, transparent 70%);
-            background-size: 200% 100%;
-            animation: shimmerMove 3s infinite linear;
-            pointer-events: none;
-            z-index: 200;
-        }
-
-        @keyframes shimmerMove {
-            0% { background-position: 100% 0; }
-            100% { background-position: -100% 0; }
-        }
     </style>
 </head>
 <body>
@@ -76,11 +58,6 @@
         
         <label>Цвет Неонового Свечения</label>
         <input type="color" id="neon-color" value="#f9e076">
-        
-        <div style="margin-top: 10px; display: flex; align-items: center;">
-            <input type="checkbox" id="shimmer-check" checked style="width: 20px; margin: 0 10px 0 0;">
-            <label style="margin:0; color:#fff;">Эффект Блеска (Билборд)</label>
-        </div>
 
         <h2>Тексты и Локализация</h2>
         <label>Заголовок старта</label>
@@ -104,10 +81,17 @@
             </select>
         </div>
 
-        <h2>Оформление</h2>
+        <h2>Настройки кнопок</h2>
         <label>Размер текста %</label><input type="range" id="fontSize" min="2" max="8" step="0.1" value="4.5">
-        <label>Цвет кнопок ответов</label>
+        <label>Цвет кнопок</label>
         <input type="color" id="btn-color" value="#f9e076">
+        
+        <div class="color-grid">
+            <div><label>Высота (vmin)</label><input type="number" id="btn-height" value="8"></div>
+            <div><label>Ширина (%)</label><input type="number" id="btn-width" value="100"></div>
+        </div>
+        <label>Отступ между кнопками (vmin)</label>
+        <input type="number" id="btn-gap" value="2">
 
         <h2>Отступы (vmin)</h2>
         <div class="color-grid">
@@ -178,25 +162,17 @@ function buildInnerGame() {
         br: document.getElementById('borderRadius').value,
         ff: document.getElementById('fontFamily').value,
         btnCol: document.getElementById('btn-color').value,
+        btnH: document.getElementById('btn-height').value,
+        btnW: document.getElementById('btn-width').value,
+        btnGap: document.getElementById('btn-gap').value,
         pv: document.getElementById('padV').value,
         ph: document.getElementById('padH').value,
         lang: document.getElementById('lang').value,
         neon: document.getElementById('neon-color').value,
-        shimmer: document.getElementById('shimmer-check').checked,
         levels: levels,
         pigs: [GITHUB_RAW+"1.png", GITHUB_RAW+"2.png", GITHUB_RAW+"3.png", GITHUB_RAW+"4.png"],
         coin: GITHUB_RAW+"5.png"
     };
-
-    // CSS для перелива внутри виджета
-    const shimmerCSS = cfg.shimmer ? `
-        body::after {
-            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
-            background-size: 200% 100%; animation: shimmerMove 4s infinite linear; pointer-events: none; z-index: 999;
-        }
-        @keyframes shimmerMove { 0% { background-position: 150% 0; } 100% { background-position: -150% 0; } }
-    ` : '';
 
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
     <style>
@@ -207,28 +183,27 @@ function buildInnerGame() {
         #pile-box { flex:1; position:relative; display:flex; justify-content:center; align-items:center; }
         .pig { width:75vmin; height:auto; z-index:5; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8)); object-fit: contain; }
         
-        /* ОБЛАСТЬ ВНУТРИ СВИНКИ */
-        .coins-container { position:absolute; bottom:25%; width:40vmin; height:25vmin; z-index:4; display:flex; justify-content:center; }
+        /* ОБЛАСТЬ ВНУТРИ СВИНКИ (ЦЕНТРИРОВАНИЕ) */
+        .coins-container { position:absolute; bottom:8vmin; left:50%; transform:translateX(-50%); width:40vmin; height:25vmin; z-index:4; overflow:visible; }
         .coin-element { position:absolute; width:6vmin; height:6vmin; background:url(${cfg.coin}) center/cover no-repeat; filter: brightness(1.2) drop-shadow(0 0 3px gold); }
         
         /* ПАДАЮЩАЯ МОНЕТКА */
         .falling-coin { position:absolute; top:-20vh; width:8vmin; height:8vmin; background:url(${cfg.coin}) center/cover no-repeat; z-index:10; filter: drop-shadow(0 0 10px gold); }
         
-        .ui { min-height:40%; display:flex; flex-direction:column; justify-content:flex-end; }
-        .q-text { font-size:${cfg.fz}vmin; text-align:center; margin-bottom:4vmin; font-weight:bold; min-height:3em; display:flex; align-items:center; justify-content:center; }
-        .btn-grid { display:grid; gap:2vmin; }
-        button { border:none; background:${cfg.btnCol}; color:#000; padding:3vmin; border-radius:${cfg.br}px; cursor:pointer; font-weight:bold; font-size:4vmin; transition: 0.2s; }
+        .ui { min-height:30%; display:flex; flex-direction:column; justify-content:flex-end; align-items: center; }
+        .q-text { width:100%; font-size:${cfg.fz}vmin; text-align:center; margin-bottom:2vmin; font-weight:bold; min-height:3em; display:flex; align-items:center; justify-content:center; }
+        .btn-grid { display:grid; gap:${cfg.btnGap}vmin; width: 100%; justify-items: center; }
+        button { border:none; background:${cfg.btnCol}; color:#000; width:${cfg.btnW}%; height:${cfg.btnH}vmin; border-radius:${cfg.br}px; cursor:pointer; font-weight:bold; font-size:4vmin; transition: 0.2s; padding: 0; }
         button:hover { transform: scale(1.02); }
         .screen { position:absolute; inset:0; background:rgba(0,0,0,0.9); z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:5vmin; border-radius:${cfg.br}px; }
         
         @keyframes fallIn { 0% { top:-20vh; opacity:1; transform: rotate(0deg) scale(1.2); } 100% { top: 45%; transform: rotate(360deg) scale(0.6); opacity: 0; } }
-        ${shimmerCSS}
     </style></head><body>
         <div class="bg"></div>
         <div id="game">
             <div id="start-screen" class="screen">
                 <h1 style="font-size:8vmin; color:#f9e076; text-shadow: 0 0 20px rgba(249, 224, 118, 0.5);">${cfg.title}</h1>
-                <button onclick="startGame()">${cfg.btnTxt}</button>
+                <button onclick="startGame()" style="width:60%; height:10vmin;">${cfg.btnTxt}</button>
             </div>
             <div class="score-box" id="total-score">0</div>
             <div id="pile-box">
@@ -313,12 +288,12 @@ function buildInnerGame() {
             const p = document.getElementById('pile');
             const c = document.createElement('div');
             c.className = 'coin-element';
-            // Случайное распределение по ширине и высоте контейнера "брюшка"
-            const x = (Math.random() * 30 - 15); 
-            const y = (Math.random() * 15); 
-            c.style.left = 'calc(50% + ' + x + 'vmin)';
-            c.style.bottom = y + 'vmin';
-            c.style.transform = 'translate(-50%, 0) rotate(' + (Math.random()*360) + 'deg)';
+            // Равномерное распределение внутри контейнера брюшка
+            const x = Math.random() * 90; 
+            const y = Math.random() * 90; 
+            c.style.left = x + '%';
+            c.style.top = y + '%';
+            c.style.transform = 'rotate(' + (Math.random()*360) + 'deg)';
             c.style.zIndex = Math.floor(Math.random() * 10);
             p.appendChild(c);
         }
@@ -339,16 +314,12 @@ function updatePreview() {
     const wrapper = document.getElementById('device-wrapper');
     const br = document.getElementById('borderRadius').value + 'px';
     const neon = document.getElementById('neon-color').value;
-    const shimmer = document.getElementById('shimmer-check').checked;
     
     wrapper.style.width = document.getElementById('width').value + 'px';
     wrapper.style.height = document.getElementById('height').value + 'px';
     wrapper.style.borderRadius = br;
     wrapper.style.boxShadow = `0 0 20px ${neon}, 0 0 60px ${neon}`;
     
-    if (shimmer) wrapper.classList.add('shimmer-effect');
-    else wrapper.classList.remove('shimmer-effect');
-
     document.getElementById('ifr').srcdoc = buildInnerGame();
 }
 
