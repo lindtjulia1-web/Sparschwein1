@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>KGB Piggy Bank Billboard Edition</title>
+    <title>KGB Piggy Bank Pro Editor</title>
     <style>
         :root { --accent: #f9e076; --bg: #1e1e24; --panel: #2a2a32; --border: #3d3d45; --green: #4caf50; --red: #f44336; }
         body { font-family: 'Segoe UI', sans-serif; background: #000; color: #fff; margin: 0; display: flex; height: 100vh; overflow: hidden; }
@@ -20,18 +20,29 @@
         
         .btn { border: none; padding: 14px; width: 100%; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
         .btn-add { background: #444; color: #fff; font-size: 11px; padding: 8px; }
-        .btn-main { background: #ffb347; color: #000; }
-        .btn-code { background: #77dd77; color: #000; }
+        .btn-main { background: #ffb347; color: #000; } 
+        .btn-code { background: #77dd77; color: #000; } 
 
-        .preview { flex: 1; background: #0c0c0e; display: flex; align-items: center; justify-content: center; padding: 40px; }
-        #device-wrapper { background: #000; position: relative; overflow: visible; transition: 0.3s; }
-        iframe { width: 100%; height: 100%; border: none; display: block; }
+        .preview { flex: 1; background: #0c0c0e; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        /* ЭКРАН С РЕДАКТИРУЕМЫМИ УГЛАМИ И СВЕЧЕНИЕМ */
+        #device-wrapper { 
+            position: relative; 
+            overflow: hidden; 
+            transition: 0.3s; 
+            background-size: cover; 
+            background-position: center;
+            box-shadow: 0 0 30px rgba(249, 224, 118, 0.3); /* Мягкое свечение */
+        }
+        iframe { width: 100%; height: 100%; border: none; }
         
         #code-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; }
         textarea { width: 80%; height: 50%; background: #111; color: var(--accent); padding: 20px; border: 1px solid var(--accent); border-radius: 20px; font-family: monospace; }
         
         .color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         input[type="color"] { height: 35px; padding: 2px; cursor: pointer; }
+
+        @keyframes billboard { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.2); box-shadow: 0 0 50px rgba(249, 224, 118, 0.5); } }
+        .anim-border { animation: billboard 3s infinite ease-in-out; }
     </style>
 </head>
 <body>
@@ -40,32 +51,48 @@
     <div class="sidebar-content">
         <h2>Настройки Экрана</h2>
         <div class="color-grid">
-            <div><label>Ширина</label><input type="number" id="width" value="400" onchange="updatePreview()"></div>
-            <div><label>Высота</label><input type="number" id="height" value="600" onchange="updatePreview()"></div>
+            <div><label>Ширина</label><input type="number" id="width" value="400"></div>
+            <div><label>Высота</label><input type="number" id="height" value="600"></div>
         </div>
         <label>Фон (URL)</label>
-        <input type="text" id="bg-url" placeholder="URL картинки" onchange="updatePreview()">
+        <input type="text" id="bg-url" placeholder="URL картинки">
 
-        <h2>Эффект Билборда и Неон</h2>
-        <div class="color-grid">
-            <div><label>Цвет неона</label><input type="color" id="neon-color" value="#f9e076" onchange="updatePreview()"></div>
-            <div><label>Сила свечения</label><input type="range" id="neon-blur" min="0" max="40" value="15" oninput="updatePreview()"></div>
-        </div>
-        <label>Скругление углов (px)</label>
-        <input type="range" id="borderRadius" min="0" max="80" value="30" oninput="updatePreview()">
-
-        <h2>Тексты</h2>
-        <label>Заголовок / Кнопка / Финал</label>
-        <input type="text" id="start-title" value="Сокровища Пирата" onchange="updatePreview()">
-        <input type="text" id="start-btn-text" value="В БОЙ" onchange="updatePreview()">
-        <input type="text" id="end-text" value="ЗОЛОТО ВАШЕ!" onchange="updatePreview()">
+        <h2>Тексты и Локализация</h2>
+        <label>Заголовок старта</label>
+        <input type="text" id="start-title" value="Сокровища Пирата">
+        <label>Кнопка старта</label>
+        <input type="text" id="start-btn-text" value="В БОЙ">
+        <label>Текст финала</label>
+        <input type="text" id="end-text" value="ЗОЛОТО ВАШЕ!">
         
+        <label>Язык / Шрифт</label>
+        <div class="color-grid">
+            <select id="lang">
+                <option value="ru">Русский</option>
+                <option value="en">English (Latin)</option>
+                <option value="de">Deutsch</option>
+            </select>
+            <select id="fontFamily">
+                <option value="'Segoe UI', sans-serif">Segoe UI</option>
+                <option value="'Georgia', serif">Georgia</option>
+                <option value="'Courier New', monospace">Courier</option>
+            </select>
+        </div>
+
         <h2>Оформление</h2>
         <div class="color-grid">
-            <div><label>Размер текста %</label><input type="range" id="fontSize" min="2" max="8" step="0.1" value="4.5" oninput="updatePreview()"></div>
-            <div><label>Цвет кнопок</label><input type="color" id="btn-color" value="#f9e076" onchange="updatePreview()"></div>
+            <div><label>Размер текста %</label><input type="range" id="fontSize" min="2" max="8" step="0.1" value="4.5"></div>
+            <div><label>Углы экрана/кнопок</label><input type="range" id="borderRadius" min="0" max="100" value="30"></div>
         </div>
-        
+        <label>Цвет кнопок ответов</label>
+        <input type="color" id="btn-color" value="#f9e076">
+
+        <h2>Отступы (vmin)</h2>
+        <div class="color-grid">
+            <div><label>Верх/Низ</label><input type="number" id="padV" value="4"></div>
+            <div><label>Лево/Право</label><input type="number" id="padH" value="4"></div>
+        </div>
+
         <h2>Уровни сложности</h2>
         <div id="levels-container"></div>
     </div>
@@ -77,7 +104,7 @@
 </div>
 
 <div class="preview">
-    <div id="device-wrapper"><iframe id="ifr"></iframe></div>
+    <div id="device-wrapper" class="anim-border"><iframe id="ifr"></iframe></div>
 </div>
 
 <div id="code-modal">
@@ -92,19 +119,20 @@ for(let i=1; i<=4; i++) {
     const lvlDiv = document.createElement('div');
     lvlDiv.innerHTML = `<h3>Уровень ${i} (Свинка ${i}.png)</h3>
                         <div id="q-container-lvl-${i}"></div>
-                        <button class="btn btn-add" onclick="addQ(${i})">+ Добавить вопрос</button>`;
+                        <button class="btn btn-add" onclick="addQ(${i})">+ Добавить вопрос (Lvl ${i})</button>`;
     document.getElementById('levels-container').appendChild(lvlDiv);
 }
 
 function addQ(lvl, q="", c="", w="") {
     const container = document.getElementById(`q-container-lvl-${lvl}`);
     if(container.children.length >= 5) return;
+    
     const div = document.createElement('div');
     div.className = 'card';
     div.innerHTML = `<span class="del-btn" onclick="this.parentElement.remove()">УДАЛИТЬ</span>
-        <input type="text" class="inp-q" value="${q}" placeholder="Вопрос">
-        <input type="text" class="inp-correct" value="${c}" placeholder="Верно">
-        <input type="text" class="inp-wrong" value="${w}" placeholder="Ложные">`;
+        <label>Вопрос</label><input type="text" class="inp-q" value="${q}">
+        <label style="color:var(--green)">Верный</label><input type="text" class="inp-correct" value="${c}">
+        <label style="color:var(--red)">Ложные (через запятую)</label><input type="text" class="inp-wrong" value="${w}">`;
     container.appendChild(div);
 }
 
@@ -112,10 +140,11 @@ function buildInnerGame() {
     const levels = [];
     for(let i=1; i<=4; i++) {
         const cards = Array.from(document.querySelectorAll(`#q-container-lvl-${i} .card`));
-        levels.push(cards.map(c => ({
+        const questions = cards.map(c => ({
             q: c.querySelector('.inp-q').value,
             a: [c.querySelector('.inp-correct').value, ...c.querySelector('.inp-wrong').value.split(',').map(x => x.trim())]
-        })).filter(x => x.q));
+        })).filter(x => x.q);
+        levels.push(questions);
     }
 
     const cfg = {
@@ -125,9 +154,11 @@ function buildInnerGame() {
         endTxt: document.getElementById('end-text').value,
         fz: document.getElementById('fontSize').value,
         br: document.getElementById('borderRadius').value,
+        ff: document.getElementById('fontFamily').value,
         btnCol: document.getElementById('btn-color').value,
-        neon: document.getElementById('neon-color').value,
-        neonB: document.getElementById('neon-blur').value,
+        pv: document.getElementById('padV').value,
+        ph: document.getElementById('padH').value,
+        lang: document.getElementById('lang').value,
         levels: levels,
         pigs: [GITHUB_RAW+"1.png", GITHUB_RAW+"2.png", GITHUB_RAW+"3.png", GITHUB_RAW+"4.png"],
         coin: GITHUB_RAW+"5.png"
@@ -135,40 +166,33 @@ function buildInnerGame() {
 
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
     <style>
-        body { margin:0; height:100vh; overflow:hidden; font-family:sans-serif; background:#000; color:#fff; display:flex; flex-direction:column; position:relative; }
-        
-        /* Эффект Билборда */
-        body::before {
-            content: ""; position: absolute; top: -100%; left: -100%; width: 300%; height: 300%;
-            background: linear-gradient(135deg, rgba(255,255,255,0) 40%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 60%);
-            animation: shine 6s infinite; pointer-events: none; z-index: 20;
-        }
-        @keyframes shine { 0% { transform: translate(-30%, -30%); } 100% { transform: translate(30%, 30%); } }
-
+        body { margin:0; height:100vh; overflow:hidden; font-family:${cfg.ff}; background:#000; color:#fff; display:flex; flex-direction:column; border-radius:${cfg.br}px; }
         .bg { position:fixed; inset:0; background:url(${cfg.bg}) center/cover; opacity:0.5; z-index:-1; }
-        #game { height:100%; display:flex; flex-direction:column; padding:5vmin; box-sizing:border-box; }
-        .score-box { font-size:10vmin; color:${cfg.neon}; font-weight:900; text-align:center; text-shadow: 0 0 15px ${cfg.neon}; }
-        
+        #game { height:100%; display:flex; flex-direction:column; padding:${cfg.pv}vmin ${cfg.ph}vmin; box-sizing:border-box; }
+        .score-box { font-size:10vmin; color:#f9e076; font-weight:900; text-align:center; text-shadow: 0 0 15px rgba(249, 224, 118, 0.5); }
         #pile-box { flex:1; position:relative; display:flex; justify-content:center; align-items:center; }
-        .pig { width:75vmin; height:auto; z-index:5; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8)); }
+        .pig { width:75vmin; height:auto; z-index:5; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8)); object-fit: contain; }
         
-        .coins-container { position:absolute; bottom:25%; width:50vmin; height:20vmin; z-index:4; display:flex; justify-content:center; }
-        .coin-element { position:absolute; width:12vmin; height:12vmin; background:url(${cfg.coin}) center/cover no-repeat; filter: drop-shadow(0 2px 4px #000); animation: sparkle 3s infinite; }
-        .falling-coin { position:absolute; top:-60vh; width:16vmin; height:16vmin; background:url(${cfg.coin}) center/cover no-repeat; z-index:10; }
+        /* ГОРКА МОНЕТОК */
+        .coins-container { position:absolute; bottom:28%; width:30vmin; height:15vmin; z-index:4; display:flex; justify-content:center; }
+        .coin-element { position:absolute; width:12vmin; height:12vmin; background:url(${cfg.coin}) center/cover no-repeat; filter: brightness(1.2) drop-shadow(0 0 5px gold); }
+        
+        /* ПАДАЮЩАЯ МОНЕТКА */
+        .falling-coin { position:absolute; top:-20vh; width:16vmin; height:16vmin; background:url(${cfg.coin}) center/cover no-repeat; z-index:10; filter: drop-shadow(0 0 10px gold); }
         
         .ui { min-height:40%; display:flex; flex-direction:column; justify-content:flex-end; }
-        .q-text { font-size:${cfg.fz}vmin; text-align:center; margin-bottom:4vmin; font-weight:bold; }
+        .q-text { font-size:${cfg.fz}vmin; text-align:center; margin-bottom:4vmin; font-weight:bold; min-height:3em; display:flex; align-items:center; justify-content:center; }
         .btn-grid { display:grid; gap:2vmin; }
-        button { border:none; background:${cfg.btnCol}; color:#000; padding:3.5vmin; border-radius:${cfg.br/5}vmin; cursor:pointer; font-weight:bold; font-size:4.5vmin; transition: 0.2s; }
+        button { border:none; background:${cfg.btnCol}; color:#000; padding:3vmin; border-radius:${cfg.br}px; cursor:pointer; font-weight:bold; font-size:4vmin; transition: 0.2s; }
+        button:hover { transform: scale(1.02); }
+        .screen { position:absolute; inset:0; background:rgba(0,0,0,0.9); z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:5vmin; border-radius:${cfg.br}px; }
         
-        .screen { position:absolute; inset:0; background:rgba(0,0,0,0.9); z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
-        @keyframes fallIn { to { top: 40%; transform: scale(0.6) rotate(360deg); opacity: 0; } }
-        @keyframes sparkle { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.4) drop-shadow(0 0 5px white); } }
+        @keyframes fallIn { 0% { top:-20vh; opacity:1; transform: rotate(0deg) scale(1.2); } 100% { top: 40%; transform: rotate(360deg) scale(0.6); opacity: 0; } }
     </style></head><body>
         <div class="bg"></div>
         <div id="game">
             <div id="start-screen" class="screen">
-                <h1 style="font-size:10vmin; color:${cfg.neon}">${cfg.title}</h1>
+                <h1 style="font-size:8vmin; color:#f9e076; text-shadow: 0 0 20px rgba(249, 224, 118, 0.5);">${cfg.title}</h1>
                 <button onclick="startGame()">${cfg.btnTxt}</button>
             </div>
             <div class="score-box" id="total-score">0</div>
@@ -184,11 +208,12 @@ function buildInnerGame() {
     <script>
         let score = 0, currentLvl = 0, currentQ = 0, stake = 0;
         const cfg = ${JSON.stringify(cfg)};
+        const labels = { ru: "СТАВКА:", en: "STAKE:", de: "EINSATZ:" };
 
         function startGame() { document.getElementById('start-screen').style.display='none'; nextStep(); }
 
         function nextStep() {
-            if(currentLvl >= 4 || (cfg.levels[currentLvl] && cfg.levels[currentLvl].length === 0 && currentLvl < 3)) {
+            if(currentLvl >= cfg.levels.length || (cfg.levels[currentLvl].length === 0 && currentLvl < 3)) {
                 if(currentLvl < 3) { currentLvl++; nextStep(); return; }
                 finishGame(); return;
             }
@@ -201,10 +226,12 @@ function buildInnerGame() {
         }
 
         function showStakes() {
-            document.getElementById('q-label').innerText = "STAKE / СТАВКА";
-            const area = document.getElementById('btn-area'); area.innerHTML = '';
+            document.getElementById('q-label').innerText = labels[cfg.lang] || labels.en;
+            const area = document.getElementById('btn-area');
+            area.innerHTML = '';
             [10, 50, 100, 250].forEach(val => {
-                const b = document.createElement('button'); b.innerText = val;
+                const b = document.createElement('button');
+                b.innerText = val;
                 b.onclick = () => { stake = val; showQuestion(); };
                 area.appendChild(b);
             });
@@ -213,14 +240,22 @@ function buildInnerGame() {
         function showQuestion() {
             const data = cfg.levels[currentLvl][currentQ];
             document.getElementById('q-label').innerText = data.q;
-            const area = document.getElementById('btn-area'); area.innerHTML = '';
+            const area = document.getElementById('btn-area');
+            area.innerHTML = '';
             [...data.a].sort(() => Math.random() - 0.5).forEach(txt => {
-                const b = document.createElement('button'); b.innerText = txt;
+                const b = document.createElement('button');
+                b.innerText = txt;
                 b.onclick = () => {
-                    if(txt === data.a[0]) { score += stake; spawnCoins(Math.ceil(stake/10)); }
-                    else { score = Math.max(0, score - stake); }
+                    if(txt === data.a[0]) { 
+                        score += stake; 
+                        spawnCoins(Math.ceil(stake/10));
+                    } else { 
+                        score = Math.max(0, score - stake);
+                        removeCoins(Math.ceil(stake/10));
+                    }
                     document.getElementById('total-score').innerText = score;
-                    currentQ++; setTimeout(nextStep, 1000);
+                    currentQ++;
+                    setTimeout(nextStep, 1500);
                 };
                 area.appendChild(b);
             });
@@ -231,11 +266,11 @@ function buildInnerGame() {
                 setTimeout(() => {
                     const c = document.createElement('div');
                     c.className = 'falling-coin';
-                    c.style.left = (40 + Math.random()*20) + '%';
-                    c.style.animation = 'fallIn 0.7s ease-in forwards';
+                    c.style.left = (42 + Math.random()*16) + '%';
+                    c.style.animation = 'fallIn 1.2s ease-in forwards'; /* ЗАМЕДЛЕНО */
                     document.body.appendChild(c);
-                    setTimeout(() => { c.remove(); addToPile(); }, 650);
-                }, i * 120);
+                    setTimeout(() => { c.remove(); addToPile(); }, 1100);
+                }, i * 150);
             }
         }
 
@@ -243,11 +278,19 @@ function buildInnerGame() {
             const p = document.getElementById('pile');
             const c = document.createElement('div');
             c.className = 'coin-element';
-            const r = Math.random() * 20; const ang = Math.random() * Math.PI * 2;
-            c.style.left = (20 + Math.cos(ang)*r) + 'vmin';
-            c.style.bottom = (Math.random() * 8) + 'vmin';
-            c.style.transform = 'rotate(' + (Math.random()*360) + 'deg)';
+            // Формируем горку: меньше разброс по X, больше по Y
+            const x = (Math.random() * 10 - 5); 
+            const y = (p.children.length * 0.4); 
+            c.style.left = 'calc(50% + ' + x + 'vmin)';
+            c.style.bottom = y + 'vmin';
+            c.style.transform = 'translate(-50%, 0) rotate(' + (Math.random()*360) + 'deg)';
+            c.style.zIndex = p.children.length;
             p.appendChild(c);
+        }
+
+        function removeCoins(num) {
+            const p = document.getElementById('pile');
+            for(let i=0; i<num; i++) if(p.lastChild) p.lastChild.remove();
         }
 
         function finishGame() {
@@ -259,30 +302,24 @@ function buildInnerGame() {
 
 function updatePreview() {
     const wrapper = document.getElementById('device-wrapper');
-    const br = document.getElementById('borderRadius').value;
-    const nc = document.getElementById('neon-color').value;
-    const nb = document.getElementById('neon-blur').value;
-    
+    const br = document.getElementById('borderRadius').value + 'px';
     wrapper.style.width = document.getElementById('width').value + 'px';
     wrapper.style.height = document.getElementById('height').value + 'px';
-    wrapper.style.borderRadius = br + 'px';
-    wrapper.style.boxShadow = `0 0 ${nb}px ${nc}`;
-    
+    wrapper.style.borderRadius = br;
     document.getElementById('ifr').srcdoc = buildInnerGame();
 }
 
 function getGeniallyCode() {
-    const br = document.getElementById('borderRadius').value;
-    const nc = document.getElementById('neon-color').value;
-    const nb = document.getElementById('neon-blur').value;
     const html = buildInnerGame().replace(/"/g, '&quot;');
-    const code = `<div style="padding:${nb}px; display:inline-block;"><iframe width="${document.getElementById('width').value}" height="${document.getElementById('height').value}" srcdoc="${html}" frameborder="0" scrolling="no" style="border-radius:${br}px; box-shadow: 0 0 ${nb}px ${nc};"></iframe></div>`;
+    const br = document.getElementById('borderRadius').value + 'px';
+    const code = `<iframe width="100%" height="100%" srcdoc="${html}" frameborder="0" scrolling="no" style="overflow:hidden;border-radius:${br};box-shadow: 0 0 30px rgba(249, 224, 118, 0.4);"></iframe>`;
     document.getElementById('result-code').value = code;
     document.getElementById('code-modal').style.display = 'flex';
 }
 
 window.onload = () => {
-    addQ(1, "Первое сокровище?", "Золото", "Песок");
+    addQ(1, "Уровень 1: Легкий вопрос?", "Да", "Нет");
+    addQ(2, "Уровень 2: Средний вопрос?", "Верно", "Ложь");
     updatePreview();
 }
 </script>
