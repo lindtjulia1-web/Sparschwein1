@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>KGB Piggy Bank Pro Editor</title>
+    <title>KGB Piggy Bank Pro Editor - Fixed</title>
     <style>
         :root { --accent: #f9e076; --bg: #1e1e24; --panel: #2a2a32; --border: #3d3d45; --green: #4caf50; --red: #f44336; }
         body { font-family: 'Segoe UI', sans-serif; background: #000; color: #fff; margin: 0; display: flex; height: 100vh; overflow: hidden; }
@@ -22,15 +22,9 @@
         .btn-add { background: #444; color: #fff; font-size: 11px; padding: 8px; }
         .btn-main { background: #ffb347; color: #000; } 
         .btn-code { background: #77dd77; color: #000; } 
-
+        
         .preview { flex: 1; background: #0c0c0e; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        #device-wrapper { 
-            position: relative; 
-            overflow: hidden; 
-            transition: 0.3s; 
-            background-size: cover; 
-            background-position: center;
-        }
+        #device-wrapper { position: relative; transition: 0.3s; background: transparent; }
         iframe { width: 100%; height: 100%; border: none; }
         
         #code-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; }
@@ -53,53 +47,29 @@
         <input type="text" id="bg-url" placeholder="URL картинки">
 
         <h2>Эффекты Виджета</h2>
-        <label>Закругление углов</label>
-        <input type="range" id="borderRadius" min="0" max="100" value="30">
-        
-        <label>Цвет Неонового Свечения</label>
-        <input type="color" id="neon-color" value="#f9e076">
+        <label>Закругление (px)</label><input type="range" id="borderRadius" min="0" max="100" value="30">
+        <label>Цвет Неона</label><input type="color" id="neon-color" value="#f9e076">
 
-        <h2>Тексты и Локализация</h2>
-        <label>Заголовок старта</label>
+        <h2>Тексты</h2>
         <input type="text" id="start-title" value="Сокровища Пирата">
-        <label>Кнопка старта</label>
         <input type="text" id="start-btn-text" value="В БОЙ">
-        <label>Текст финала</label>
         <input type="text" id="end-text" value="ЗОЛОТО ВАШЕ!">
         
-        <label>Язык / Шрифт</label>
-        <div class="color-grid">
-            <select id="lang">
-                <option value="ru">Русский</option>
-                <option value="en">English</option>
-                <option value="de">Deutsch</option>
-            </select>
-            <select id="fontFamily">
-                <option value="'Segoe UI', sans-serif">Segoe UI</option>
-                <option value="'Georgia', serif">Georgia</option>
-                <option value="'Courier New', monospace">Courier</option>
-            </select>
-        </div>
-
-        <h2>Настройки кнопок</h2>
+        <h2>Кнопки</h2>
         <label>Размер текста %</label><input type="range" id="fontSize" min="2" max="8" step="0.1" value="4.5">
-        <label>Цвет кнопок</label>
         <input type="color" id="btn-color" value="#f9e076">
         
         <div class="color-grid">
             <div><label>Высота (vmin)</label><input type="number" id="btn-height" value="8"></div>
             <div><label>Ширина (%)</label><input type="number" id="btn-width" value="100"></div>
         </div>
-        <label>Отступ между кнопками (vmin)</label>
-        <input type="number" id="btn-gap" value="2">
 
-        <h2>Отступы (vmin)</h2>
+        <h2>Отступы UI (vmin)</h2>
         <div class="color-grid">
             <div><label>Верх/Низ</label><input type="number" id="padV" value="11"></div>
             <div><label>Лево/Право</label><input type="number" id="padH" value="26"></div>
         </div>
 
-        <h2>Уровни сложности</h2>
         <div id="levels-container"></div>
     </div>
     
@@ -109,13 +79,11 @@
     </div>
 </div>
 
-<div class="preview">
-    <div id="device-wrapper"><iframe id="ifr"></iframe></div>
-</div>
+<div class="preview"><div id="device-wrapper"><iframe id="ifr"></iframe></div></div>
 
 <div id="code-modal">
     <textarea id="result-code" readonly onclick="this.select()"></textarea>
-    <button class="btn" onclick="document.getElementById('code-modal').style.display='none'" style="width: 200px; background:#fff; color:#000;">ЗАКРЫТЬ</button>
+    <button class="btn" onclick="document.getElementById('code-modal').style.display='none'" style="width: 200px; background:#fff; color:#000; margin-top:20px;">ЗАКРЫТЬ</button>
 </div>
 
 <script>
@@ -123,24 +91,21 @@ const GITHUB_RAW = "https://raw.githubusercontent.com/lindtjulia1-web/Sparschwei
 
 for(let i=1; i<=4; i++) {
     const lvlDiv = document.createElement('div');
-    lvlDiv.innerHTML = `<h3>Уровень ${i}</h3>
-                        <div id="q-container-lvl-${i}"></div>
-                        <button class="btn btn-add" onclick="addQ(${i})">+ Добавить вопрос (Lvl ${i})</button>`;
+    lvlDiv.innerHTML = `<h3>Уровень ${i}</h3><div id="q-container-lvl-${i}"></div><button class="btn btn-add" onclick="addQ(${i})">+ Добавить вопрос</button>`;
     document.getElementById('levels-container').appendChild(lvlDiv);
 }
 
-function addQ(lvl, q="", c="", w="") {
+function addQ(lvl, q="Ваш вопрос?", c="Верно", w="Неверно") {
     const container = document.getElementById(`q-container-lvl-${lvl}`);
-    if(!container || container.children.length >= 5) return;
-    
     const div = document.createElement('div');
     div.className = 'card';
     div.innerHTML = `<span class="del-btn" onclick="this.parentElement.remove()">УДАЛИТЬ</span>
         <label>Вопрос</label><input type="text" class="inp-q" value="${q}">
         <label style="color:var(--green)">Верный</label><input type="text" class="inp-correct" value="${c}">
-        <label style="color:var(--red)">Ложные (через запятую)</label><input type="text" class="inp-wrong" value="${w}">`;
+        <label style="color:var(--red)">Ложные</label><input type="text" class="inp-wrong" value="${w}">`;
     container.appendChild(div);
 }
+addQ(1);
 
 function buildInnerGame() {
     const levels = [];
@@ -155,197 +120,98 @@ function buildInnerGame() {
 
     const cfg = {
         bg: document.getElementById('bg-url').value,
-        title: document.getElementById('start-title').value,
-        btnTxt: document.getElementById('start-btn-text').value,
-        endTxt: document.getElementById('end-text').value,
-        fz: document.getElementById('fontSize').value,
+        ts: document.getElementById('start-title').value,
+        bs: document.getElementById('start-btn-text').value,
+        te: document.getElementById('end-text').value,
         br: document.getElementById('borderRadius').value,
-        ff: document.getElementById('fontFamily').value,
+        neon: document.getElementById('neon-color').value,
         btnCol: document.getElementById('btn-color').value,
         btnH: document.getElementById('btn-height').value,
         btnW: document.getElementById('btn-width').value,
-        btnGap: document.getElementById('btn-gap').value,
-        pv: document.getElementById('padV').value,
-        ph: document.getElementById('padH').value,
-        lang: document.getElementById('lang').value,
-        neon: document.getElementById('neon-color').value,
-        levels: levels,
-        pigs: [
-            GITHUB_RAW+"1.png", 
-            GITHUB_RAW+"2.png", 
-            GITHUB_RAW+"3.png", 
-            GITHUB_RAW+"4.png", 
-            GITHUB_RAW+"5.png", 
-            GITHUB_RAW+"6.png"
-        ],
+        fz: document.getElementById('fontSize').value,
+        pV: document.getElementById('padV').value,
+        pH: document.getElementById('padH').value,
+        lvls: levels,
+        pigs: [GITHUB_RAW+"1.png", GITHUB_RAW+"2.png", GITHUB_RAW+"3.png", GITHUB_RAW+"4.png", GITHUB_RAW+"5.png", GITHUB_RAW+"6.png"],
         coin: GITHUB_RAW+"7.png"
     };
 
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
     <style>
-        body { margin:0; height:100vh; overflow:hidden; font-family:${cfg.ff}; background:#000; color:#fff; display:flex; flex-direction:column; border-radius:${cfg.br}px; position: relative; }
-        .bg { position:fixed; inset:0; background:url(${cfg.bg}) center/cover; opacity:0.5; z-index:-1; }
-        #game { height:100%; display:flex; flex-direction:column; padding:${cfg.pv}vmin ${cfg.ph}vmin; box-sizing:border-box; }
-        .score-box { font-size:10vmin; color:#f9e076; font-weight:900; text-align:center; text-shadow: 0 0 15px rgba(249, 224, 118, 0.5); z-index:10; }
-        #pile-box { flex:1; position:relative; display:flex; justify-content:center; align-items:center; }
-        .pig { width:75vmin; height:auto; z-index:5; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8)); object-fit: contain; }
-        
-        /* Исправленный контейнер монет - теперь он строго внутри свинки */
-        .coins-container { position:absolute; top: 48%; left: 50%; transform: translate(-50%, -50%); width:40vmin; height:20vmin; z-index:4; overflow:hidden; pointer-events:none; }
-        .coin-element { position:absolute; width:7vmin; height:7vmin; background:url(${cfg.coin}) center/cover no-repeat; filter: brightness(1.2) drop-shadow(0 0 3px gold); }
-        
-        .falling-coin { position:absolute; top:-20vh; width:8vmin; height:8vmin; background:url(${cfg.coin}) center/cover no-repeat; z-index:10; filter: drop-shadow(0 0 10px gold); }
-        
-        .ui { min-height:30%; display:flex; flex-direction:column; justify-content:flex-end; align-items: center; z-index:10; }
-        .q-text { width:100%; font-size:${cfg.fz}vmin; text-align:center; margin-bottom:2vmin; font-weight:bold; min-height:3em; display:flex; align-items:center; justify-content:center; }
-        .btn-grid { display:grid; gap:${cfg.btnGap}vmin; width: 100%; justify-items: center; }
-        button { border:none; background:${cfg.btnCol}; color:#000; width:${cfg.btnW}%; height:${cfg.btnH}vmin; border-radius:${cfg.br}px; cursor:pointer; font-weight:bold; font-size:4vmin; transition: 0.2s; padding: 0; }
-        button:hover { transform: scale(1.02); }
-        .screen { position:absolute; inset:0; background:rgba(0,0,0,0.9); z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:5vmin; border-radius:${cfg.br}px; }
-        
-        #firework { position: absolute; inset: 0; pointer-events: none; z-index: 20; display: none; background: radial-gradient(circle, rgba(255,223,0,0.3) 0%, transparent 70%); animation: flash 0.5s infinite alternate; }
-        @keyframes flash { from { opacity: 0.3; } to { opacity: 0.8; } }
-        @keyframes fallIn { 0% { top:-20vh; opacity:1; transform: rotate(0deg) scale(1.2); } 100% { top: 45%; transform: rotate(360deg) scale(0.6); opacity: 0; } }
+        body, html { margin:0; padding:0; height:100%; overflow:hidden; background:transparent; font-family:sans-serif; display:flex; align-items:center; justify-content:center; }
+        #safe { padding: 40px; width:100%; height:100%; box-sizing:border-box; display:flex; align-items:center; justify-content:center; }
+        #game { 
+            width:100%; height:100%; background:#000; position:relative; overflow:hidden;
+            border-radius:${cfg.br}px; box-shadow: 0 0 35px ${cfg.neon}; 
+        }
+        .bg { position:absolute; inset:0; background:url(${cfg.bg}) center/cover; opacity:0.5; }
+        .ui { position:relative; z-index:10; height:100%; display:flex; flex-direction:column; padding:${cfg.pV}vmin ${cfg.pH}vmin; box-sizing:border-box; text-align:center; color:#fff; }
+        .sc { font-size:10vmin; color:#f9e076; font-weight:900; }
+        .pig-box { flex:1; display:flex; align-items:center; justify-content:center; }
+        .pig { width:75vmin; height:auto; object-fit:contain; }
+        .q-txt { font-size:${cfg.fz}vmin; font-weight:bold; margin-bottom:2vmin; min-height:2.5em; display:flex; align-items:center; justify-content:center; }
+        .btns { display:grid; gap:1.5vmin; justify-items:center; }
+        button { background:${cfg.btnCol}; border:none; width:${cfg.btnW}%; height:${cfg.btnH}vmin; border-radius:30px; font-weight:bold; font-size:3.5vmin; cursor:pointer; }
+        .screen { position:absolute; inset:0; background:rgba(0,0,0,0.95); z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+        .coin { position:absolute; width:8vmin; height:8vmin; background:url(${cfg.coin}) center/cover; z-index:50; pointer-events:none; }
+        @keyframes drop { to { top:50%; opacity:0; transform:rotate(360deg); } }
     </style></head><body>
-        <div id="firework"></div>
-        <div class="bg"></div>
-        <div id="game">
-            <div id="start-screen" class="screen">
-                <h1 style="font-size:8vmin; color:#f9e076; text-shadow: 0 0 20px rgba(249, 224, 118, 0.5);">${cfg.title}</h1>
-                <button onclick="startGame()" style="width:60%; height:10vmin;">${cfg.btnTxt}</button>
-            </div>
-            <div class="score-box" id="total-score">0</div>
-            <div id="pile-box">
-                <img id="pig-img" src="${cfg.pigs[0]}" class="pig">
-                <div class="coins-container" id="pile"></div>
+        <div id="safe"><div id="game">
+            <div class="bg"></div>
+            <div id="start" class="screen">
+                <h1 style="font-size:8vmin; color:#f9e076">${cfg.ts}</h1>
+                <button onclick="run()" style="width:60%; height:10vmin">${cfg.bs}</button>
             </div>
             <div class="ui">
-                <div class="q-text" id="q-label"></div>
-                <div id="btn-area" class="btn-grid"></div>
+                <div class="sc" id="score">0</div>
+                <div class="pig-box"><img id="p-img" src="${cfg.pigs[0]}" class="pig"></div>
+                <div class="q-txt" id="q-txt"></div>
+                <div id="ans" class="btns"></div>
             </div>
-        </div>
+        </div></div>
     <script>
-        let score = 0, currentLvl = 0, currentQ = 0, stake = 0;
-        const cfg = ${JSON.stringify(cfg)};
-        const labels = { ru: "СТАВКА:", en: "STAKE:", de: "EINSATZ:" };
-
-        function startGame() { document.getElementById('start-screen').style.display='none'; nextStep(); }
-
-        function nextStep() {
-            if(currentLvl >= cfg.levels.length) { finishGame(); return; }
-            if(cfg.levels[currentLvl].length === 0) { currentLvl++; nextStep(); return; }
-            if(currentQ >= cfg.levels[currentLvl].length) {
-                currentLvl++; currentQ = 0;
-                nextStep(); return;
-            }
-            showStakes();
-        }
-
-        function showStakes() {
-            document.getElementById('q-label').innerText = labels[cfg.lang] || labels.en;
-            const area = document.getElementById('btn-area');
-            area.innerHTML = '';
-            [10, 50, 100, 250].forEach(val => {
-                const b = document.createElement('button');
-                b.innerText = val;
-                b.onclick = () => { stake = val; showQuestion(); };
-                area.appendChild(b);
+        let s=0, l=0, q=0; const c=${JSON.stringify(cfg)};
+        function run(){ document.getElementById('start').style.display='none'; load(); }
+        function load(){
+            const d=c.lvls[l][q]; if(!d) return end();
+            document.getElementById('q-txt').innerText=d.q;
+            const a=document.getElementById('ans'); a.innerHTML='';
+            [...d.a].sort(()=>Math.random()-0.5).forEach(t=>{
+                const b=document.createElement('button'); b.innerText=t;
+                b.onclick=()=>{ if(t===d.a[0]){ s+=100; document.getElementById('score').innerText=s; fx(); } next(); };
+                a.appendChild(b);
             });
+            document.getElementById('p-img').src=c.pigs[l]||c.pigs[0];
         }
-
-        function showQuestion() {
-            const data = cfg.levels[currentLvl][currentQ];
-            document.getElementById('q-label').innerText = data.q;
-            const area = document.getElementById('btn-area');
-            area.innerHTML = '';
-            [...data.a].sort(() => Math.random() - 0.5).forEach(txt => {
-                const b = document.createElement('button');
-                b.innerText = txt;
-                b.onclick = () => {
-                    if(txt === data.a[0]) { 
-                        score += stake; 
-                        spawnCoins(Math.ceil(stake/10));
-                        if(currentLvl < 5) document.getElementById('pig-img').src = cfg.pigs[currentLvl+1];
-                    } else { 
-                        score = Math.max(0, score - stake);
-                        removeCoins(Math.ceil(stake/10));
-                    }
-                    document.getElementById('total-score').innerText = score;
-                    currentQ++;
-                    setTimeout(nextStep, 1500);
-                };
-                area.appendChild(b);
-            });
-        }
-
-        function spawnCoins(num) {
-            for(let i=0; i<num; i++) {
-                setTimeout(() => {
-                    const c = document.createElement('div');
-                    c.className = 'falling-coin';
-                    c.style.left = (46 + Math.random()*8) + '%';
-                    c.style.animation = 'fallIn 1.2s ease-in forwards';
-                    document.body.appendChild(c);
-                    setTimeout(() => { c.remove(); addToPile(); }, 1100);
-                }, i * 150);
-            }
-        }
-
-        function addToPile() {
-            const p = document.getElementById('pile');
-            const c = document.createElement('div');
-            c.className = 'coin-element';
-            // Координаты ограничены центром свинки
-            const x = 20 + Math.random() * 60; 
-            const y = 30 + Math.random() * 50; 
-            c.style.left = x + '%';
-            c.style.top = y + '%';
-            c.style.transform = 'rotate(' + (Math.random()*360) + 'deg)';
-            p.appendChild(c);
-        }
-
-        function removeCoins(num) {
-            const p = document.getElementById('pile');
-            for(let i=0; i<num; i++) if(p.lastChild) p.lastChild.remove();
-        }
-
-        function finishGame() {
-            document.getElementById('pig-img').src = cfg.pigs[5];
-            document.getElementById('firework').style.display = 'block';
-            document.getElementById('q-label').innerText = cfg.endTxt;
-            document.getElementById('btn-area').innerHTML = '<button onclick="location.reload()">RESTART</button>';
-        }
+        function next(){ q++; if(q>=c.lvls[l].length){ l++; q=0; } if(l>=c.lvls.length) end(); else load(); }
+        function fx(){ for(let i=0;i<6;i++){ const m=document.createElement('div'); m.className='coin'; m.style.left=Math.random()*80+10+'%'; m.style.top='-10%'; m.style.animation='drop 0.7s linear forwards'; document.body.appendChild(m); setTimeout(()=>m.remove(),700); } }
+        function end(){ document.body.innerHTML='<div class="screen"><h1>'+c.te+'</h1><h2 style="font-size:15vmin; color:#f9e076">'+s+'</h2><button onclick="location.reload()">RESTART</button></div>'; }
     <\/script></body></html>`;
 }
 
 function updatePreview() {
-    const wrapper = document.getElementById('device-wrapper');
-    const brInput = document.getElementById('borderRadius');
-    const neonInput = document.getElementById('neon-color');
-    if (!wrapper || !brInput || !neonInput) return;
-    const br = brInput.value + 'px';
-    const neon = neonInput.value;
-    wrapper.style.width = document.getElementById('width').value + 'px';
-    wrapper.style.height = document.getElementById('height').value + 'px';
-    wrapper.style.borderRadius = br;
-    wrapper.style.boxShadow = `0 0 20px ${neon}, 0 0 60px ${neon}`;
-    document.getElementById('ifr').srcdoc = buildInnerGame();
+    const w = document.getElementById('width').value, h = document.getElementById('height').value;
+    const wrp = document.getElementById('device-wrapper');
+    wrp.style.width = w + 'px'; wrp.style.height = h + 'px';
+    const doc = document.getElementById('ifr').contentWindow.document;
+    doc.open(); doc.write(buildInnerGame()); doc.close();
 }
 
 function getGeniallyCode() {
-    const html = buildInnerGame().replace(/"/g, '&quot;');
-    const br = document.getElementById('borderRadius').value + 'px';
-    const neon = document.getElementById('neon-color').value;
-    const code = `<iframe width="100%" height="100%" srcdoc="${html}" frameborder="0" scrolling="no" style="overflow:hidden;border-radius:${br};box-shadow: 0 0 20px ${neon}, 0 0 60px ${neon};"></iframe>`;
-    document.getElementById('result-code').value = code;
+    const w = document.getElementById('width').value, h = document.getElementById('height').value;
+    const content = buildInnerGame().replace(/<\/script>/g, '<\\/script>');
+    const iframeCode = `<div style="width:100%; max-width:${w}px; margin:auto;">
+    <div style="position:relative; padding-top:${(h/w)*100}%; height:0; overflow:hidden;">
+        <iframe srcdoc="${content.replace(/"/g, '&quot;')}" 
+                style="position:absolute; top:0; left:0; width:100%; height:100%; border:none; background:transparent;" 
+                allowfullscreen></iframe>
+    </div>
+</div>`;
+    document.getElementById('result-code').value = iframeCode;
     document.getElementById('code-modal').style.display = 'flex';
 }
 
-window.onload = () => {
-    addQ(1, "Уровень 1: Легкий вопрос?", "Да", "Нет");
-    addQ(2, "Уровень 2: Средний вопрос?", "Верно", "Ложь");
-    updatePreview();
-}
+updatePreview();
 </script>
 </body>
 </html>
