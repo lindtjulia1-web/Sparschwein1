@@ -71,7 +71,7 @@
         <div class="color-grid">
             <select id="lang">
                 <option value="ru">Русский</option>
-                <option value="en">English (Latin)</option>
+                <option value="en">English</option>
                 <option value="de">Deutsch</option>
             </select>
             <select id="fontFamily">
@@ -190,7 +190,8 @@ function buildInnerGame() {
         #pile-box { flex:1; position:relative; display:flex; justify-content:center; align-items:center; }
         .pig { width:75vmin; height:auto; z-index:5; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8)); object-fit: contain; }
         
-        .coins-container { position:absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width:45vmin; height:25vmin; z-index:4; overflow:hidden; pointer-events:none; }
+        /* Исправленный контейнер монет - теперь он строго внутри свинки */
+        .coins-container { position:absolute; top: 48%; left: 50%; transform: translate(-50%, -50%); width:40vmin; height:20vmin; z-index:4; overflow:hidden; pointer-events:none; }
         .coin-element { position:absolute; width:7vmin; height:7vmin; background:url(${cfg.coin}) center/cover no-repeat; filter: brightness(1.2) drop-shadow(0 0 3px gold); }
         
         .falling-coin { position:absolute; top:-20vh; width:8vmin; height:8vmin; background:url(${cfg.coin}) center/cover no-repeat; z-index:10; filter: drop-shadow(0 0 10px gold); }
@@ -204,7 +205,7 @@ function buildInnerGame() {
         
         #firework { position: absolute; inset: 0; pointer-events: none; z-index: 20; display: none; background: radial-gradient(circle, rgba(255,223,0,0.3) 0%, transparent 70%); animation: flash 0.5s infinite alternate; }
         @keyframes flash { from { opacity: 0.3; } to { opacity: 0.8; } }
-        @keyframes fallIn { 0% { top:-20vh; opacity:1; transform: rotate(0deg) scale(1.2); } 100% { top: 50%; transform: rotate(360deg) scale(0.6); opacity: 0; } }
+        @keyframes fallIn { 0% { top:-20vh; opacity:1; transform: rotate(0deg) scale(1.2); } 100% { top: 45%; transform: rotate(360deg) scale(0.6); opacity: 0; } }
     </style></head><body>
         <div id="firework"></div>
         <div class="bg"></div>
@@ -231,12 +232,8 @@ function buildInnerGame() {
         function startGame() { document.getElementById('start-screen').style.display='none'; nextStep(); }
 
         function nextStep() {
-            if(currentLvl >= cfg.levels.length) {
-                finishGame(); return;
-            }
-            if(cfg.levels[currentLvl].length === 0) {
-                currentLvl++; nextStep(); return;
-            }
+            if(currentLvl >= cfg.levels.length) { finishGame(); return; }
+            if(cfg.levels[currentLvl].length === 0) { currentLvl++; nextStep(); return; }
             if(currentQ >= cfg.levels[currentLvl].length) {
                 currentLvl++; currentQ = 0;
                 nextStep(); return;
@@ -268,11 +265,7 @@ function buildInnerGame() {
                     if(txt === data.a[0]) { 
                         score += stake; 
                         spawnCoins(Math.ceil(stake/10));
-                        // Логика смены картинок при правильном ответе
-                        if(currentLvl === 0) document.getElementById('pig-img').src = cfg.pigs[1];
-                        else if(currentLvl === 1) document.getElementById('pig-img').src = cfg.pigs[2];
-                        else if(currentLvl === 2) document.getElementById('pig-img').src = cfg.pigs[3];
-                        else if(currentLvl === 3) document.getElementById('pig-img').src = cfg.pigs[4];
+                        if(currentLvl < 5) document.getElementById('pig-img').src = cfg.pigs[currentLvl+1];
                     } else { 
                         score = Math.max(0, score - stake);
                         removeCoins(Math.ceil(stake/10));
@@ -302,9 +295,9 @@ function buildInnerGame() {
             const p = document.getElementById('pile');
             const c = document.createElement('div');
             c.className = 'coin-element';
-            // Концентрация внутри свинки
-            const x = 10 + Math.random() * 70; 
-            const y = 20 + Math.random() * 60; 
+            // Координаты ограничены центром свинки
+            const x = 20 + Math.random() * 60; 
+            const y = 30 + Math.random() * 50; 
             c.style.left = x + '%';
             c.style.top = y + '%';
             c.style.transform = 'rotate(' + (Math.random()*360) + 'deg)';
@@ -329,17 +322,13 @@ function updatePreview() {
     const wrapper = document.getElementById('device-wrapper');
     const brInput = document.getElementById('borderRadius');
     const neonInput = document.getElementById('neon-color');
-    
     if (!wrapper || !brInput || !neonInput) return;
-
     const br = brInput.value + 'px';
     const neon = neonInput.value;
-    
     wrapper.style.width = document.getElementById('width').value + 'px';
     wrapper.style.height = document.getElementById('height').value + 'px';
     wrapper.style.borderRadius = br;
     wrapper.style.boxShadow = `0 0 20px ${neon}, 0 0 60px ${neon}`;
-    
     document.getElementById('ifr').srcdoc = buildInnerGame();
 }
 
