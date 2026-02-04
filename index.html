@@ -264,4 +264,93 @@ function buildInnerGame() {
                     if(txt === data.a[0]) { 
                         score += stake; 
                         spawnCoins(Math.ceil(stake/10));
-                        if(currentLvl < 5) document.getElementById('pig-img').src = cfg.p
+                        if(currentLvl < 5) document.getElementById('pig-img').src = cfg.pigs[currentLvl+1];
+                    } else { 
+                        score = Math.max(0, score - stake);
+                        removeCoins(Math.ceil(stake/10));
+                    }
+                    document.getElementById('total-score').innerText = score;
+                    currentQ++;
+                    setTimeout(nextStep, 1500);
+                };
+                area.appendChild(b);
+            });
+        }
+
+        function spawnCoins(num) {
+            for(let i=0; i<num; i++) {
+                setTimeout(() => {
+                    const c = document.createElement('div');
+                    c.className = 'falling-coin';
+                    c.style.left = (46 + Math.random()*8) + '%';
+                    c.style.animation = 'fallIn 1.2s ease-in forwards';
+                    document.body.appendChild(c);
+                    setTimeout(() => { c.remove(); addToPile(); }, 1100);
+                }, i * 150);
+            }
+        }
+
+        function addToPile() {
+            const p = document.getElementById('pile');
+            const c = document.createElement('div');
+            c.className = 'coin-element';
+            const x = 20 + Math.random() * 60; 
+            const y = 30 + Math.random() * 50; 
+            c.style.left = x + '%';
+            c.style.top = y + '%';
+            c.style.transform = 'rotate(' + (Math.random()*360) + 'deg)';
+            p.appendChild(c);
+        }
+
+        function removeCoins(num) {
+            const p = document.getElementById('pile');
+            for(let i=0; i<num; i++) if(p.lastChild) p.lastChild.remove();
+        }
+
+        function finishGame() {
+            document.getElementById('pig-img').src = cfg.pigs[5];
+            document.getElementById('firework').style.display = 'block';
+            document.getElementById('q-label').innerText = cfg.endTxt;
+            document.getElementById('btn-area').innerHTML = '<button onclick="location.reload()">RESTART</button>';
+        }
+    <\/script></body></html>`;
+}
+
+function updatePreview() {
+    const wrapper = document.getElementById('device-wrapper');
+    const brInput = document.getElementById('borderRadius');
+    const neonInput = document.getElementById('neon-color');
+    if (!wrapper || !brInput || !neonInput) return;
+    const br = brInput.value + 'px';
+    const neon = neonInput.value;
+    wrapper.style.width = document.getElementById('width').value + 'px';
+    wrapper.style.height = document.getElementById('height').value + 'px';
+    wrapper.style.borderRadius = br;
+    wrapper.style.boxShadow = `0 0 20px ${neon}, 0 0 60px ${neon}`;
+    document.getElementById('ifr').srcdoc = buildInnerGame();
+}
+
+function getGeniallyCode() {
+    const html = buildInnerGame().replace(/"/g, '&quot;');
+    const br = document.getElementById('borderRadius').value + 'px';
+    const neon = document.getElementById('neon-color').value;
+    const w = document.getElementById('width').value;
+    const h = document.getElementById('height').value;
+    
+    // ВАЖНО: Добавлен запас (margin 60px), чтобы свечение не обрезалось
+    const code = `<div style="display: inline-block; margin: 60px; line-height: 0;">
+        <iframe width="${w}px" height="${h}px" srcdoc="${html}" frameborder="0" scrolling="no" style="border-radius:${br}; box-shadow: 0 0 20px ${neon}, 0 0 60px ${neon};"></iframe>
+    </div>`;
+    
+    document.getElementById('result-code').value = code;
+    document.getElementById('code-modal').style.display = 'flex';
+}
+
+window.onload = () => {
+    addQ(1, "Уровень 1: Легкий вопрос?", "Да", "Нет");
+    addQ(2, "Уровень 2: Средний вопрос?", "Верно", "Ложь");
+    updatePreview();
+}
+</script>
+</body>
+</html>
