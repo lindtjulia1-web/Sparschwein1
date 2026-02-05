@@ -223,7 +223,6 @@ function buildInnerGame() {
         const labels = { ru: "СТАВКА:", en: "STAKE:", de: "EINSATZ:" };
 
         // --- AUDIO ENGINE ---
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const snd = {
             coin: () => {
                 const a = new Audio(cfg.sfxCoin);
@@ -235,23 +234,10 @@ function buildInnerGame() {
                 a.loop = true;
                 a.volume = 0.5;
                 a.play().catch(()=>{});
-            },
-            playSynth: (f, t, d, v=0.1) => {
-                try {
-                    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-                    o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-                    g.gain.setValueAtTime(v, audioCtx.currentTime);
-                    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
-                    o.connect(g); g.connect(audioCtx.destination);
-                    o.start(); o.stop(audioCtx.currentTime + d);
-                } catch(e) {}
-            },
-            win: function() { this.playSynth(523, 'square', 0.1); setTimeout(()=>this.playSynth(659, 'square', 0.2), 100); },
-            fail: function() { this.playSynth(120, 'sawtooth', 0.4, 0.15); }
+            }
         };
 
         function startGame() { 
-            if(audioCtx.state === 'suspended') audioCtx.resume();
             document.getElementById('start-screen').style.display='none'; 
             nextStep(); 
         }
@@ -280,10 +266,10 @@ function buildInnerGame() {
                 const b = document.createElement('button'); b.innerText = txt;
                 b.onclick = () => {
                     if(txt === data.a[0]) { 
-                        score += stake; snd.win(); spawnCoins(Math.ceil(stake/10));
+                        score += stake; spawnCoins(Math.ceil(stake/10));
                         if(currentLvl < 5) document.getElementById('pig-img').src = cfg.pigs[currentLvl+1];
                     } else { 
-                        score = Math.max(0, score - stake); snd.fail(); removeCoins(Math.ceil(stake/10));
+                        score = Math.max(0, score - stake); removeCoins(Math.ceil(stake/10));
                     }
                     document.getElementById('total-score').innerText = score;
                     currentQ++; setTimeout(nextStep, 1500);
