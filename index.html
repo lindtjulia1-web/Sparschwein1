@@ -24,7 +24,13 @@
         .btn-code { background: #77dd77; color: #000; } 
 
         .preview { flex: 1; background: #0c0c0e; display: flex; align-items: center; justify-content: center; padding: 40px; }
-        #device-wrapper { position: relative; overflow: visible; transition: 0.3s; background: #000; border-radius: 30px; }
+        #device-wrapper { 
+            position: relative; 
+            overflow: visible; 
+            transition: 0.3s; 
+            background: #000;
+            border-radius: 30px;
+        }
         iframe { width: 100%; height: 100%; border: none; display: block; border-radius: 30px; }
         
         #code-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; }
@@ -47,7 +53,7 @@
         <input type="text" id="bg-url" placeholder="URL картинки">
 
         <h2>Эффекты Виджета</h2>
-        <label>Цвет Неонового Свечения</label>
+        <label>Цвет Рамки</label>
         <input type="color" id="neon-color" value="#f9e076">
 
         <h2>Тексты и Локализация</h2>
@@ -84,7 +90,7 @@
         <label>Отступ между кнопками (vmin)</label>
         <input type="number" id="btn-gap" value="2">
 
-        <h2>Отступы (vmin)</h2>
+        <h2>Отстуны (vmin)</h2>
         <div class="color-grid">
             <div><label>Верх/Низ</label><input type="number" id="padV" value="11"></div>
             <div><label>Лево/Право</label><input type="number" id="padH" value="26"></div>
@@ -169,36 +175,41 @@ function buildInnerGame() {
             margin:0; height:100vh; overflow:hidden; font-family:${cfg.ff}; background:#000; color:#fff; display:flex; flex-direction:column; 
             border-radius:30px; position: relative; box-sizing: border-box;
             border: 6px solid ${cfg.neon};
-            animation: neon-pulse 3s infinite linear;
+            box-shadow: inset 0 0 15px ${cfg.neon}, 0 0 15px ${cfg.neon};
         }
-        @keyframes neon-pulse {
-            0% { box-shadow: inset 0 0 15px ${cfg.neon}, 0 0 15px ${cfg.neon}; filter: hue-rotate(0deg); }
-            50% { box-shadow: inset 0 0 30px ${cfg.neon}, 0 0 40px ${cfg.neon}; }
-            100% { box-shadow: inset 0 0 15px ${cfg.neon}, 0 0 15px ${cfg.neon}; filter: hue-rotate(360deg); }
+        @keyframes gold-sparkle {
+            0% { filter: drop-shadow(0 0 5px gold) brightness(1); }
+            50% { filter: drop-shadow(0 0 20px #f9e076) brightness(1.2); }
+            100% { filter: drop-shadow(0 0 5px gold) brightness(1); }
         }
         .bg { position:fixed; inset:0; background:url(${cfg.bg}) center/cover; opacity:0.5; z-index:-1; border-radius:24px; }
         #game { height:100%; display:flex; flex-direction:column; padding:${cfg.pv}vmin ${cfg.ph}vmin; box-sizing:border-box; }
-        .score-box { font-size:10vmin; color:#f9e076; font-weight:900; text-align:center; text-shadow: 0 0 15px rgba(249, 224, 118, 0.5); z-index:10; }
+        .score-box { font-size:10vmin; color:#f9e076; font-weight:900; text-align:center; text-shadow: 0 0 15px rgba(249, 224, 118, 0.8); z-index:10; }
         #pile-box { flex:1; position:relative; display:flex; justify-content:center; align-items:center; }
-        .pig { width:75vmin; height:auto; z-index:5; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8)); object-fit: contain; }
+        .pig { width:75vmin; height:auto; z-index:5; object-fit: contain; animation: gold-sparkle 3s infinite ease-in-out; }
         .coins-container { position:absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width:45vmin; height:25vmin; z-index:4; overflow:hidden; pointer-events:none; }
-        .coin-element { position:absolute; width:7vmin; height:7vmin; background:url(${cfg.coin}) center/cover no-repeat; filter: brightness(1.2) drop-shadow(0 0 3px gold); }
+        .coin-element { position:absolute; width:7vmin; height:7vmin; background:url(${cfg.coin}) center/cover no-repeat; animation: gold-sparkle 2s infinite alternate; }
         .falling-coin { position:absolute; top:-20vh; width:8vmin; height:8vmin; background:url(${cfg.coin}) center/cover no-repeat; z-index:10; filter: drop-shadow(0 0 10px gold); }
         .ui { min-height:30%; display:flex; flex-direction:column; justify-content:flex-end; align-items: center; z-index:10; }
         .q-text { width:100%; font-size:${cfg.fz}vmin; text-align:center; margin-bottom:2vmin; font-weight:bold; min-height:3em; display:flex; align-items:center; justify-content:center; }
         .btn-grid { display:grid; gap:${cfg.btnGap}vmin; width: 100%; justify-items: center; }
-        button { border:none; background:${cfg.btnCol}; color:#000; width:${cfg.btnW}%; height:${cfg.btnH}vmin; border-radius:15px; cursor:pointer; font-weight:bold; font-size:4vmin; transition: 0.2s; padding: 0; }
-        button:hover { transform: scale(1.02); }
+        button { 
+            border:none; background:${cfg.btnCol}; color:#000; width:${cfg.btnW}%; height:${cfg.btnH}vmin; 
+            border-radius:15px; cursor:pointer; font-weight:bold; font-size:4vmin; transition: 0.2s; padding: 0;
+            animation: gold-sparkle 4s infinite ease-in-out;
+        }
+        button:hover { transform: scale(1.02); filter: brightness(1.3) drop-shadow(0 0 10px gold); }
         .screen { position:absolute; inset:0; background:rgba(0,0,0,0.9); z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:5vmin; border-radius:24px; }
-        #firework-canvas { position: absolute; inset: 0; pointer-events: none; z-index: 20; display: none; }
+        #final-shower { position: absolute; inset: 0; pointer-events: none; z-index: 20; display: none; }
         @keyframes fallIn { 0% { top:-20vh; opacity:1; transform: rotate(0deg) scale(1.2); } 100% { top: 50%; transform: rotate(360deg) scale(0.6); opacity: 0; } }
+        @keyframes endRain { 0% { top:-10vh; opacity:1; } 100% { top:110vh; opacity:0.3; } }
     </style></head><body>
-        <canvas id="firework-canvas"></canvas>
+        <div id="final-shower"></div>
         <div class="bg"></div>
         <div id="game">
             <div id="start-screen" class="screen">
                 <h1 style="font-size:8vmin; color:#f9e076; text-shadow: 0 0 20px rgba(249, 224, 118, 0.5);">${cfg.title}</h1>
-                <button onclick="startGame()" style="width:60%; height:10vmin;">${cfg.btnTxt}</button>
+                <button onclick="startGame()" style="width:60%; height:10vmin; animation:none;">${cfg.btnTxt}</button>
             </div>
             <div class="score-box" id="total-score">0</div>
             <div id="pile-box"><img id="pig-img" src="${cfg.pigs[0]}" class="pig"><div class="coins-container" id="pile"></div></div>
@@ -209,22 +220,23 @@ function buildInnerGame() {
         const cfg = ${JSON.stringify(cfg)};
         const labels = { ru: "СТАВКА:", en: "STAKE:", de: "EINSATZ:" };
 
-        // --- ЗВУКОВОЙ ДВИЖОК ---
+        // --- AUDIO ENGINE ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playSfx(freq, type, duration, vol=0.1) {
+        function playSfx(f, t, d, v=0.1) {
             try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(); osc.stop(audioCtx.currentTime + duration);
+                const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+                o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+                g.gain.setValueAtTime(v, audioCtx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
+                o.connect(g); g.connect(audioCtx.destination);
+                o.start(); o.stop(audioCtx.currentTime + d);
             } catch(e) {}
         }
-        function soundCoin() { playSfx(900 + Math.random()*200, 'sine', 0.2, 0.05); }
-        function soundWin() { playSfx(523.25, 'square', 0.1); setTimeout(()=>playSfx(659.25, 'square', 0.3), 100); }
-        function soundFail() { playSfx(150, 'sawtooth', 0.5, 0.2); }
+        const snd = {
+            coin: () => playSfx(900 + Math.random()*300, 'sine', 0.2, 0.05),
+            win: () => { playSfx(523, 'square', 0.1); setTimeout(()=>playSfx(659, 'square', 0.2), 100); },
+            fail: () => playSfx(120, 'sawtooth', 0.4, 0.15)
+        };
 
         function startGame() { 
             if(audioCtx.state === 'suspended') audioCtx.resume();
@@ -238,6 +250,7 @@ function buildInnerGame() {
             if(currentQ >= cfg.levels[currentLvl].length) { currentLvl++; currentQ = 0; nextStep(); return; }
             showStakes();
         }
+
         function showStakes() {
             document.getElementById('q-label').innerText = labels[cfg.lang] || labels.en;
             const area = document.getElementById('btn-area'); area.innerHTML = '';
@@ -246,6 +259,7 @@ function buildInnerGame() {
                 b.onclick = () => { stake = val; showQuestion(); }; area.appendChild(b);
             });
         }
+
         function showQuestion() {
             const data = cfg.levels[currentLvl][currentQ];
             document.getElementById('q-label').innerText = data.q;
@@ -254,16 +268,17 @@ function buildInnerGame() {
                 const b = document.createElement('button'); b.innerText = txt;
                 b.onclick = () => {
                     if(txt === data.a[0]) { 
-                        score += stake; soundWin(); spawnCoins(Math.ceil(stake/10));
+                        score += stake; snd.win(); spawnCoins(Math.ceil(stake/10));
                         if(currentLvl < 5) document.getElementById('pig-img').src = cfg.pigs[currentLvl+1];
                     } else { 
-                        score = Math.max(0, score - stake); soundFail(); removeCoins(Math.ceil(stake/10));
+                        score = Math.max(0, score - stake); snd.fail(); removeCoins(Math.ceil(stake/10));
                     }
                     document.getElementById('total-score').innerText = score;
                     currentQ++; setTimeout(nextStep, 1500);
                 }; area.appendChild(b);
             });
         }
+
         function spawnCoins(num) {
             for(let i=0; i<num; i++) {
                 setTimeout(() => {
@@ -271,57 +286,42 @@ function buildInnerGame() {
                     c.style.left = (46 + Math.random()*8) + '%';
                     c.style.animation = 'fallIn 1.2s ease-in forwards';
                     document.body.appendChild(c);
-                    soundCoin();
+                    snd.coin();
                     setTimeout(() => { c.remove(); addToPile(); }, 1100);
                 }, i * 150);
             }
         }
+
         function addToPile() {
             const p = document.getElementById('pile'); const c = document.createElement('div');
             c.className = 'coin-element';
-            const x = 10 + Math.random() * 70; const y = 20 + Math.random() * 60; 
-            c.style.left = x + '%'; c.style.top = y + '%';
+            c.style.left = (10 + Math.random() * 70) + '%'; 
+            c.style.top = (20 + Math.random() * 60) + '%';
             c.style.transform = 'rotate(' + (Math.random()*360) + 'deg)';
             p.appendChild(c);
         }
+
         function removeCoins(num) { const p = document.getElementById('pile'); for(let i=0; i<num; i++) if(p.lastChild) p.lastChild.remove(); }
-        
-        // --- ФЕЙЕРВЕРК ---
-        function startGoldShower() {
-            const canvas = document.getElementById('firework-canvas');
-            canvas.style.display = 'block';
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            let particles = [];
-            function create() {
-                if(particles.length < 100) {
-                    particles.push({
-                        x: Math.random() * canvas.width, y: -20,
-                        v: 2 + Math.random() * 5, r: 2 + Math.random() * 3,
-                        color: Math.random() > 0.5 ? '#f9e076' : 'gold'
-                    });
-                }
-            }
-            function draw() {
-                ctx.clearRect(0,0,canvas.width, canvas.height);
-                create();
-                particles.forEach((p, i) => {
-                    p.y += p.v;
-                    ctx.fillStyle = p.color;
-                    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
-                    if(p.y > canvas.height) particles.splice(i, 1);
-                });
-                requestAnimationFrame(draw);
-            }
-            draw();
-        }
 
         function finishGame() {
             document.getElementById('pig-img').src = cfg.pigs[5];
-            startGoldShower();
-            soundWin(); soundWin();
             document.getElementById('q-label').innerText = cfg.endTxt;
-            document.getElementById('btn-area').innerHTML = '<button onclick="location.reload()">RESTART</button>';
+            document.getElementById('btn-area').innerHTML = '<button onclick="location.reload()" style="animation:none;">RESTART</button>';
+            startRain();
+        }
+
+        function startRain() {
+            const f = document.getElementById('final-shower'); f.style.display = 'block';
+            setInterval(() => {
+                const c = document.createElement('div');
+                c.style.position = 'absolute'; c.style.width = '7vmin'; c.style.height = '7vmin';
+                c.style.background = 'url('+cfg.coin+') center/cover';
+                c.style.left = Math.random() * 100 + '%';
+                c.style.top = '-10vh';
+                c.style.animation = 'endRain ' + (1 + Math.random()) + 's linear forwards';
+                f.appendChild(c);
+                setTimeout(() => c.remove(), 2000);
+            }, 100);
         }
     <\/script></body></html>`;
 }
@@ -345,7 +345,7 @@ function getGeniallyCode() {
 }
 
 window.onload = () => {
-    addQ(1, "Уровень 1: Вопрос?", "Да", "Нет");
+    addQ(1, "Уровень 1: Золото капитана?", "Найти", "Проспать");
     updatePreview();
 }
 </script>
