@@ -18,23 +18,13 @@
         label { display: block; font-size: 10px; color: #aaa; text-transform: uppercase; margin-top: 8px; }
         input, select { width: 100%; background: #111; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 8px; margin-top: 4px; box-sizing: border-box; outline: none; font-size: 13px; }
         
-        /* New Toggle Style */
-        .toggle-container { display: flex; align-items: center; gap: 10px; margin-top: 10px; cursor: pointer; }
-        .toggle-container input { width: auto; margin: 0; }
-
         .btn { border: none; padding: 14px; width: 100%; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
         .btn-add { background: #444; color: #fff; font-size: 11px; padding: 8px; }
         .btn-main { background: #ffb347; color: #000; } 
         .btn-code { background: #77dd77; color: #000; } 
 
         .preview { flex: 1; background: #0c0c0e; display: flex; align-items: center; justify-content: center; padding: 40px; }
-        #device-wrapper { 
-            position: relative; 
-            overflow: visible; 
-            transition: 0.3s; 
-            background: #000;
-            border-radius: 30px;
-        }
+        #device-wrapper { position: relative; overflow: visible; transition: 0.3s; background: #000; border-radius: 30px; }
         iframe { width: 100%; height: 100%; border: none; display: block; border-radius: 30px; }
         
         #code-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; }
@@ -42,6 +32,8 @@
         
         .color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         input[type="color"] { height: 35px; padding: 2px; cursor: pointer; }
+        .neon-toggle { display: flex; align-items: center; gap: 10px; margin-top: 10px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; cursor: pointer; }
+        .neon-toggle input { width: auto; margin: 0; }
     </style>
 </head>
 <body>
@@ -57,10 +49,11 @@
         <input type="text" id="bg-url" placeholder="URL картинки">
 
         <h2>Эффекты Виджета</h2>
-        <label class="toggle-container">
-            <input type="checkbox" id="use-neon" checked> Использовать Неон
+        <label class="neon-toggle">
+            <input type="checkbox" id="neon-enabled" checked>
+            <span style="font-size: 11px; font-weight: bold;">ВКЛЮЧИТЬ НЕОН</span>
         </label>
-        <label>Цвет Неонового Свечения</label>
+        <label>Цвет Неона и Кнопок</label>
         <input type="color" id="neon-color" value="#f9e076">
 
         <h2>Тексты и Локализация</h2>
@@ -171,7 +164,7 @@ function buildInnerGame() {
         ph: document.getElementById('padH').value,
         lang: document.getElementById('lang').value,
         neon: document.getElementById('neon-color').value,
-        useNeon: document.getElementById('use-neon').checked,
+        neonEnabled: document.getElementById('neon-enabled').checked,
         levels: levels,
         pigs: [GITHUB_RAW+"1.png", GITHUB_RAW+"2.png", GITHUB_RAW+"3.png", GITHUB_RAW+"4.png", GITHUB_RAW+"5.png", GITHUB_RAW+"6.png"],
         coin: GITHUB_RAW+"7.png"
@@ -182,8 +175,8 @@ function buildInnerGame() {
         body { 
             margin:0; height:100vh; overflow:hidden; font-family:${cfg.ff}; background:#000; color:#fff; display:flex; flex-direction:column; 
             border-radius:30px; position: relative; box-sizing: border-box;
-            border: ${cfg.useNeon ? '6px solid '+cfg.neon : 'none'};
-            animation: ${cfg.useNeon ? 'neon-pulse 3s infinite linear' : 'none'};
+            border: ${cfg.neonEnabled ? '6px solid '+cfg.neon : 'none'};
+            animation: ${cfg.neonEnabled ? 'neon-pulse 3s infinite linear' : 'none'};
         }
         @keyframes neon-pulse {
             0% { box-shadow: inset 0 0 15px ${cfg.neon}, 0 0 15px ${cfg.neon}; filter: hue-rotate(0deg); }
@@ -191,12 +184,13 @@ function buildInnerGame() {
             100% { box-shadow: inset 0 0 15px ${cfg.neon}, 0 0 15px ${cfg.neon}; filter: hue-rotate(360deg); }
         }
         @keyframes gold-sparkle {
-            0%, 100% { filter: drop-shadow(0 0 10px #f9e076) brightness(1); }
-            50% { filter: drop-shadow(0 0 25px #ffb347) brightness(1.3); }
+            0% { filter: drop-shadow(0 0 5px gold) brightness(1.1); }
+            50% { filter: drop-shadow(0 0 20px #f9e076) brightness(1.4); }
+            100% { filter: drop-shadow(0 0 5px gold) brightness(1.1); }
         }
         .bg { position:fixed; inset:0; background:url(${cfg.bg}) center/cover; opacity:0.5; z-index:-1; border-radius:24px; }
         #game { height:100%; display:flex; flex-direction:column; padding:${cfg.pv}vmin ${cfg.ph}vmin; box-sizing:border-box; }
-        .score-box { font-size:10vmin; color:#f9e076; font-weight:900; text-align:center; text-shadow: 0 0 15px rgba(249, 224, 118, 0.8); z-index:10; }
+        .score-box { font-size:10vmin; color:#f9e076; font-weight:900; text-align:center; text-shadow: 0 0 15px rgba(249, 224, 118, 0.5); z-index:10; }
         #pile-box { flex:1; position:relative; display:flex; justify-content:center; align-items:center; }
         .pig { width:75vmin; height:auto; z-index:5; object-fit: contain; animation: gold-sparkle 2s infinite ease-in-out; }
         .coins-container { position:absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width:45vmin; height:25vmin; z-index:4; overflow:hidden; pointer-events:none; }
@@ -207,11 +201,11 @@ function buildInnerGame() {
         .btn-grid { display:grid; gap:${cfg.btnGap}vmin; width: 100%; justify-items: center; }
         
         button { 
-            border: ${cfg.useNeon ? '2px solid '+cfg.neon : 'none'}; 
+            border: ${cfg.neonEnabled ? '2px solid '+cfg.neon : 'none'}; 
             background:${cfg.btnCol}; color:#000; width:${cfg.btnW}%; height:${cfg.btnH}vmin; 
             border-radius:15px; cursor:pointer; font-weight:bold; font-size:4vmin; transition: 0.2s; padding: 0;
-            box-shadow: ${cfg.useNeon ? '0 0 10px '+cfg.neon : 'none'};
-            animation: ${cfg.useNeon ? 'neon-pulse 3s infinite linear' : 'none'};
+            box-shadow: ${cfg.neonEnabled ? '0 0 15px '+cfg.neon : 'none'};
+            animation: ${cfg.neonEnabled ? 'neon-pulse 3s infinite linear' : 'none'};
         }
         button:hover { transform: scale(1.02); filter: brightness(1.2); }
         
@@ -225,7 +219,7 @@ function buildInnerGame() {
         <div id="game">
             <div id="start-screen" class="screen">
                 <h1 style="font-size:8vmin; color:#f9e076; text-shadow: 0 0 20px rgba(249, 224, 118, 0.5);">${cfg.title}</h1>
-                <button onclick="startGame()" style="width:60%; height:10vmin; animation:none; border:none;">${cfg.btnTxt}</button>
+                <button onclick="startGame()" style="width:60%; height:10vmin; border:none; animation:none; box-shadow:none;">${cfg.btnTxt}</button>
             </div>
             <div class="score-box" id="total-score">0</div>
             <div id="pile-box"><img id="pig-img" src="${cfg.pigs[0]}" class="pig"><div class="coins-container" id="pile"></div></div>
@@ -259,10 +253,7 @@ function buildInnerGame() {
                 b.onclick = () => {
                     if(txt === data.a[0]) { 
                         score += stake; spawnCoins(Math.ceil(stake/10));
-                        if(currentLvl === 0) document.getElementById('pig-img').src = cfg.pigs[1];
-                        else if(currentLvl === 1) document.getElementById('pig-img').src = cfg.pigs[2];
-                        else if(currentLvl === 2) document.getElementById('pig-img').src = cfg.pigs[3];
-                        else if(currentLvl === 3) document.getElementById('pig-img').src = cfg.pigs[4];
+                        updatePig(currentLvl);
                     } else { 
                         score = Math.max(0, score - stake); removeCoins(Math.ceil(stake/10));
                     }
@@ -270,6 +261,10 @@ function buildInnerGame() {
                     currentQ++; setTimeout(nextStep, 1500);
                 }; area.appendChild(b);
             });
+        }
+        function updatePig(lvl) {
+            const p = document.getElementById('pig-img');
+            if(lvl < 5) p.src = cfg.pigs[lvl+1];
         }
         function spawnCoins(num) {
             for(let i=0; i<num; i++) {
@@ -295,7 +290,7 @@ function buildInnerGame() {
             document.getElementById('pig-img').src = cfg.pigs[5];
             document.getElementById('firework').style.display = 'block';
             document.getElementById('q-label').innerText = cfg.endTxt;
-            document.getElementById('btn-area').innerHTML = '<button onclick="location.reload()" style="animation:none; border:none;">RESTART</button>';
+            document.getElementById('btn-area').innerHTML = '<button onclick="location.reload()" style="border:none; animation:none; box-shadow:none;">RESTART</button>';
         }
     <\/script></body></html>`;
 }
@@ -304,10 +299,8 @@ function updatePreview() {
     const wrapper = document.getElementById('device-wrapper');
     const w = document.getElementById('width').value;
     const h = document.getElementById('height').value;
-    
     wrapper.style.width = w + 'px';
     wrapper.style.height = h + 'px';
-    
     document.getElementById('ifr').srcdoc = buildInnerGame();
 }
 
@@ -321,7 +314,7 @@ function getGeniallyCode() {
 }
 
 window.onload = () => {
-    addQ(1, "Уровень 1: Золотой вопрос?", "Золото", "Серебро");
+    addQ(1, "Первый вопрос капитана?", "Золото", "Песок");
     updatePreview();
 }
 </script>
