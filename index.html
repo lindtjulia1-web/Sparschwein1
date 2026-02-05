@@ -202,6 +202,12 @@ function buildInnerGame() {
         @keyframes flash { from { opacity: 0.3; } to { opacity: 0.8; } }
         @keyframes fallIn { 0% { top:-20vh; opacity:1; transform: rotate(0deg) scale(1.2); } 100% { top: 50%; transform: rotate(360deg) scale(0.6); opacity: 0; } }
         @keyframes rain { 0% { transform: translateY(-120vh) rotate(0deg); } 100% { transform: translateY(120vh) rotate(720deg); } }
+        @keyframes happy-pig {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-5deg) scale(1.05); }
+            75% { transform: rotate(5deg) scale(1.05); }
+        }
+        .pig-happy { animation: happy-pig 0.6s infinite ease-in-out; }
     </style></head><body>
         <div id="firework"></div>
         <div class="bg"></div>
@@ -301,7 +307,9 @@ function buildInnerGame() {
         function finishGame() {
             audioWin.play().catch(e => console.log('Audio error'));
             startCoinRain();
-            document.getElementById('pig-img').src = cfg.pigs[5];
+            const pig = document.getElementById('pig-img');
+            pig.src = cfg.pigs[5];
+            pig.classList.add('pig-happy');
             document.getElementById('firework').style.display = 'block';
             document.getElementById('q-label').innerText = cfg.endTxt;
             document.getElementById('btn-area').innerHTML = '<button onclick="location.reload()">RESTART</button>';
@@ -324,15 +332,4 @@ function getGeniallyCode() {
     const html = buildInnerGame().replace(/"/g, '&quot;');
     const w = document.getElementById('width').value;
     const h = document.getElementById('height').value;
-    const code = `<iframe width="${w}" height="${h}" srcdoc="${html}" frameborder="0" scrolling="no" style="overflow:hidden; display:block; border:none; border-radius:30px;"></iframe>`;
-    document.getElementById('result-code').value = code;
-    document.getElementById('code-modal').style.display = 'flex';
-}
-
-window.onload = () => {
-    addQ(1, "Уровень 1: Вопрос?", "Да", "Нет");
-    updatePreview();
-}
-</script>
-</body>
-</html>
+    const code = `<iframe width="${w}" height="${h}" srcdoc="${html}" frameborder="0" scrolling="no" style="overflow:hidden; display:block; border:
