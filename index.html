@@ -199,17 +199,27 @@ function buildInnerGame() {
         button:hover { transform: scale(1.02); }
         .screen { position:absolute; inset:0; background:rgba(0,0,0,0.9); z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:5vmin; border-radius:24px; }
         #firework { position: absolute; inset: 0; pointer-events: none; z-index: 20; display: none; background: radial-gradient(circle, rgba(255,223,0,0.3) 0%, transparent 70%); animation: flash 0.5s infinite alternate; }
+        
+        /* SMOKE EFFECT */
+        .smoke-particle {
+            position: absolute;
+            top: -20%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(200,200,200,0.4) 0%, rgba(100,100,100,0) 70%);
+            filter: blur(20px);
+            pointer-events: none;
+            z-index: 80;
+            animation: smokeMove 2.5s ease-in forwards;
+        }
+        @keyframes smokeMove {
+            0% { transform: translateY(0) scale(1); opacity: 0.1; }
+            50% { opacity: 0.5; }
+            100% { transform: translateY(120vh) scale(3); opacity: 0.9; }
+        }
+
         @keyframes flash { from { opacity: 0.3; } to { opacity: 0.8; } }
         @keyframes fallIn { 0% { top:-20vh; opacity:1; transform: rotate(0deg) scale(1.2); } 100% { top: 50%; transform: rotate(360deg) scale(0.6); opacity: 0; } }
         @keyframes rain { 0% { transform: translateY(-120vh) rotate(0deg); } 100% { transform: translateY(120vh) rotate(720deg); } }
-        
-        /* НОВАЯ АНИМАЦИЯ ПОКАЧИВАНИЯ */
-        @keyframes happy-pig {
-            0%, 100% { transform: rotate(0deg) scale(1); }
-            25% { transform: rotate(-5deg) scale(1.05); }
-            75% { transform: rotate(5deg) scale(1.05); }
-        }
-        .pig-happy { animation: happy-pig 0.6s infinite ease-in-out; }
     </style></head><body>
         <div id="firework"></div>
         <div class="bg"></div>
@@ -260,12 +270,28 @@ function buildInnerGame() {
                         else if(currentLvl === 3) document.getElementById('pig-img').src = cfg.pigs[4];
                     } else { 
                         score = Math.max(0, score - stake); removeCoins(Math.ceil(stake/10));
+                        spawnSmoke();
                     }
                     document.getElementById('total-score').innerText = score;
                     currentQ++; setTimeout(nextStep, 1500);
                 }; area.appendChild(b);
             });
         }
+
+        function spawnSmoke() {
+            for(let i=0; i<15; i++) {
+                const s = document.createElement('div');
+                s.className = 'smoke-particle';
+                const size = 30 + Math.random() * 40;
+                s.style.width = size + 'vw';
+                s.style.height = size + 'vw';
+                s.style.left = (Math.random() * 110 - 10) + '%';
+                s.style.animationDelay = (Math.random() * 0.5) + 's';
+                document.body.appendChild(s);
+                setTimeout(() => s.remove(), 3000);
+            }
+        }
+
         function spawnCoins(num) {
             audioCoin.currentTime = 0;
             audioCoin.play().catch(e => console.log('Audio error'));
@@ -306,26 +332,25 @@ function buildInnerGame() {
             p.appendChild(c);
         }
         function removeCoins(num) { const p = document.getElementById('pile'); for(let i=0; i<num; i++) if(p.lastChild) p.lastChild.remove(); }
-        
         function finishGame() {
             audioWin.play().catch(e => console.log('Audio error'));
             startCoinRain();
-            const pig = document.getElementById('pig-img');
-            pig.src = cfg.pigs[5];
-            pig.classList.add('pig-happy'); // Добавляем покачивание
+            document.getElementById('pig-img').src = cfg.pigs[5];
             document.getElementById('firework').style.display = 'block';
             document.getElementById('q-label').innerText = cfg.endTxt;
             document.getElementById('btn-area').innerHTML = '<button onclick="location.reload()">RESTART</button>';
         }
-    </script></body></html>`;
+    <\/script></body></html>`;
 }
 
 function updatePreview() {
     const wrapper = document.getElementById('device-wrapper');
     const w = document.getElementById('width').value;
     const h = document.getElementById('height').value;
+    
     wrapper.style.width = w + 'px';
     wrapper.style.height = h + 'px';
+    
     document.getElementById('ifr').srcdoc = buildInnerGame();
 }
 
