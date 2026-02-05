@@ -24,7 +24,13 @@
         .btn-code { background: #77dd77; color: #000; } 
 
         .preview { flex: 1; background: #0c0c0e; display: flex; align-items: center; justify-content: center; padding: 40px; }
-        #device-wrapper { position: relative; overflow: visible; transition: 0.3s; background: #000; border-radius: 30px; }
+        #device-wrapper { 
+            position: relative; 
+            overflow: visible; 
+            transition: 0.3s; 
+            background: #000;
+            border-radius: 30px;
+        }
         iframe { width: 100%; height: 100%; border: none; display: block; border-radius: 30px; }
         
         #code-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; }
@@ -32,8 +38,6 @@
         
         .color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         input[type="color"] { height: 35px; padding: 2px; cursor: pointer; }
-        .neon-toggle { display: flex; align-items: center; gap: 10px; margin-top: 10px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; cursor: pointer; }
-        .neon-toggle input { width: auto; margin: 0; }
     </style>
 </head>
 <body>
@@ -49,11 +53,7 @@
         <input type="text" id="bg-url" placeholder="URL картинки">
 
         <h2>Эффекты Виджета</h2>
-        <label class="neon-toggle">
-            <input type="checkbox" id="neon-enabled" checked>
-            <span style="font-size: 11px; font-weight: bold;">ВКЛЮЧИТЬ НЕОН</span>
-        </label>
-        <label>Цвет Неона и Кнопок</label>
+        <label>Цвет Рамки</label>
         <input type="color" id="neon-color" value="#f9e076">
 
         <h2>Тексты и Локализация</h2>
@@ -90,7 +90,7 @@
         <label>Отступ между кнопками (vmin)</label>
         <input type="number" id="btn-gap" value="2">
 
-        <h2>Отступы (vmin)</h2>
+        <h2>Отстуны (vmin)</h2>
         <div class="color-grid">
             <div><label>Верх/Низ</label><input type="number" id="padV" value="11"></div>
             <div><label>Лево/Право</label><input type="number" id="padH" value="26"></div>
@@ -164,7 +164,6 @@ function buildInnerGame() {
         ph: document.getElementById('padH').value,
         lang: document.getElementById('lang').value,
         neon: document.getElementById('neon-color').value,
-        neonEnabled: document.getElementById('neon-enabled').checked,
         levels: levels,
         pigs: [GITHUB_RAW+"1.png", GITHUB_RAW+"2.png", GITHUB_RAW+"3.png", GITHUB_RAW+"4.png", GITHUB_RAW+"5.png", GITHUB_RAW+"6.png"],
         coin: GITHUB_RAW+"7.png"
@@ -175,40 +174,32 @@ function buildInnerGame() {
         body { 
             margin:0; height:100vh; overflow:hidden; font-family:${cfg.ff}; background:#000; color:#fff; display:flex; flex-direction:column; 
             border-radius:30px; position: relative; box-sizing: border-box;
-            border: ${cfg.neonEnabled ? '6px solid '+cfg.neon : 'none'};
-            animation: ${cfg.neonEnabled ? 'neon-pulse 3s infinite linear' : 'none'};
+            border: 6px solid ${cfg.neon};
+            box-shadow: inset 0 0 15px ${cfg.neon}, 0 0 15px ${cfg.neon};
         }
-        @keyframes neon-pulse {
-            0% { box-shadow: inset 0 0 15px ${cfg.neon}, 0 0 15px ${cfg.neon}; filter: hue-rotate(0deg); }
-            50% { box-shadow: inset 0 0 30px ${cfg.neon}, 0 0 40px ${cfg.neon}; }
-            100% { box-shadow: inset 0 0 15px ${cfg.neon}, 0 0 15px ${cfg.neon}; filter: hue-rotate(360deg); }
-        }
+        /* Анимация золотого мерцания */
         @keyframes gold-sparkle {
-            0% { filter: drop-shadow(0 0 5px gold) brightness(1.1); }
-            50% { filter: drop-shadow(0 0 20px #f9e076) brightness(1.4); }
-            100% { filter: drop-shadow(0 0 5px gold) brightness(1.1); }
+            0% { filter: drop-shadow(0 0 5px gold) brightness(1); }
+            50% { filter: drop-shadow(0 0 20px #f9e076) brightness(1.2); }
+            100% { filter: drop-shadow(0 0 5px gold) brightness(1); }
         }
         .bg { position:fixed; inset:0; background:url(${cfg.bg}) center/cover; opacity:0.5; z-index:-1; border-radius:24px; }
         #game { height:100%; display:flex; flex-direction:column; padding:${cfg.pv}vmin ${cfg.ph}vmin; box-sizing:border-box; }
-        .score-box { font-size:10vmin; color:#f9e076; font-weight:900; text-align:center; text-shadow: 0 0 15px rgba(249, 224, 118, 0.5); z-index:10; }
+        .score-box { font-size:10vmin; color:#f9e076; font-weight:900; text-align:center; text-shadow: 0 0 15px rgba(249, 224, 118, 0.8); z-index:10; }
         #pile-box { flex:1; position:relative; display:flex; justify-content:center; align-items:center; }
-        .pig { width:75vmin; height:auto; z-index:5; object-fit: contain; animation: gold-sparkle 2s infinite ease-in-out; }
+        .pig { width:75vmin; height:auto; z-index:5; object-fit: contain; animation: gold-sparkle 3s infinite ease-in-out; }
         .coins-container { position:absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width:45vmin; height:25vmin; z-index:4; overflow:hidden; pointer-events:none; }
-        .coin-element { position:absolute; width:7vmin; height:7vmin; background:url(${cfg.coin}) center/cover no-repeat; animation: gold-sparkle 1.5s infinite alternate; }
-        .falling-coin { position:absolute; top:-20vh; width:8vmin; height:8vmin; background:url(${cfg.coin}) center/cover no-repeat; z-index:10; filter: drop-shadow(0 0 15px gold); }
+        .coin-element { position:absolute; width:7vmin; height:7vmin; background:url(${cfg.coin}) center/cover no-repeat; animation: gold-sparkle 2s infinite alternate; }
+        .falling-coin { position:absolute; top:-20vh; width:8vmin; height:8vmin; background:url(${cfg.coin}) center/cover no-repeat; z-index:10; filter: drop-shadow(0 0 10px gold); }
         .ui { min-height:30%; display:flex; flex-direction:column; justify-content:flex-end; align-items: center; z-index:10; }
         .q-text { width:100%; font-size:${cfg.fz}vmin; text-align:center; margin-bottom:2vmin; font-weight:bold; min-height:3em; display:flex; align-items:center; justify-content:center; }
         .btn-grid { display:grid; gap:${cfg.btnGap}vmin; width: 100%; justify-items: center; }
-        
         button { 
-            border: ${cfg.neonEnabled ? '2px solid '+cfg.neon : 'none'}; 
-            background:${cfg.btnCol}; color:#000; width:${cfg.btnW}%; height:${cfg.btnH}vmin; 
+            border:none; background:${cfg.btnCol}; color:#000; width:${cfg.btnW}%; height:${cfg.btnH}vmin; 
             border-radius:15px; cursor:pointer; font-weight:bold; font-size:4vmin; transition: 0.2s; padding: 0;
-            box-shadow: ${cfg.neonEnabled ? '0 0 15px '+cfg.neon : 'none'};
-            animation: ${cfg.neonEnabled ? 'neon-pulse 3s infinite linear' : 'none'};
+            animation: gold-sparkle 4s infinite ease-in-out;
         }
-        button:hover { transform: scale(1.02); filter: brightness(1.2); }
-        
+        button:hover { transform: scale(1.02); filter: brightness(1.3) drop-shadow(0 0 10px gold); }
         .screen { position:absolute; inset:0; background:rgba(0,0,0,0.9); z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:5vmin; border-radius:24px; }
         #firework { position: absolute; inset: 0; pointer-events: none; z-index: 20; display: none; background: radial-gradient(circle, rgba(255,223,0,0.3) 0%, transparent 70%); animation: flash 0.5s infinite alternate; }
         @keyframes flash { from { opacity: 0.3; } to { opacity: 0.8; } }
@@ -219,7 +210,7 @@ function buildInnerGame() {
         <div id="game">
             <div id="start-screen" class="screen">
                 <h1 style="font-size:8vmin; color:#f9e076; text-shadow: 0 0 20px rgba(249, 224, 118, 0.5);">${cfg.title}</h1>
-                <button onclick="startGame()" style="width:60%; height:10vmin; border:none; animation:none; box-shadow:none;">${cfg.btnTxt}</button>
+                <button onclick="startGame()" style="width:60%; height:10vmin; animation:none;">${cfg.btnTxt}</button>
             </div>
             <div class="score-box" id="total-score">0</div>
             <div id="pile-box"><img id="pig-img" src="${cfg.pigs[0]}" class="pig"><div class="coins-container" id="pile"></div></div>
@@ -253,7 +244,7 @@ function buildInnerGame() {
                 b.onclick = () => {
                     if(txt === data.a[0]) { 
                         score += stake; spawnCoins(Math.ceil(stake/10));
-                        updatePig(currentLvl);
+                        if(currentLvl < 5) document.getElementById('pig-img').src = cfg.pigs[currentLvl+1];
                     } else { 
                         score = Math.max(0, score - stake); removeCoins(Math.ceil(stake/10));
                     }
@@ -261,10 +252,6 @@ function buildInnerGame() {
                     currentQ++; setTimeout(nextStep, 1500);
                 }; area.appendChild(b);
             });
-        }
-        function updatePig(lvl) {
-            const p = document.getElementById('pig-img');
-            if(lvl < 5) p.src = cfg.pigs[lvl+1];
         }
         function spawnCoins(num) {
             for(let i=0; i<num; i++) {
@@ -290,7 +277,7 @@ function buildInnerGame() {
             document.getElementById('pig-img').src = cfg.pigs[5];
             document.getElementById('firework').style.display = 'block';
             document.getElementById('q-label').innerText = cfg.endTxt;
-            document.getElementById('btn-area').innerHTML = '<button onclick="location.reload()" style="border:none; animation:none; box-shadow:none;">RESTART</button>';
+            document.getElementById('btn-area').innerHTML = '<button onclick="location.reload()" style="animation:none;">RESTART</button>';
         }
     <\/script></body></html>`;
 }
@@ -299,8 +286,10 @@ function updatePreview() {
     const wrapper = document.getElementById('device-wrapper');
     const w = document.getElementById('width').value;
     const h = document.getElementById('height').value;
+    
     wrapper.style.width = w + 'px';
     wrapper.style.height = h + 'px';
+    
     document.getElementById('ifr').srcdoc = buildInnerGame();
 }
 
@@ -314,7 +303,7 @@ function getGeniallyCode() {
 }
 
 window.onload = () => {
-    addQ(1, "Первый вопрос капитана?", "Золото", "Песок");
+    addQ(1, "Уровень 1: Золото капитана?", "Найти", "Проспать");
     updatePreview();
 }
 </script>
