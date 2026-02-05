@@ -1,121 +1,102 @@
-<div style="width: 100%; max-width: 400px; margin: auto;">
-    <div style="position: relative; padding-top: 150%; height: 0; overflow: hidden; border-radius: 30px; box-shadow: 0 0 35px #f9e076;">
-        <iframe srcdoc="
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset='UTF-8'>
-            <style>
-                body, html { 
-                    margin: 0; padding: 0; height: 100%; width: 100%;
-                    overflow: hidden; font-family: 'Segoe UI', sans-serif;
-                    background: #000; color: #fff;
-                }
-                /* Фон с золотым песком */
-                .bg {
-                    position: absolute; inset: 0;
-                    background: url('https://images.unsplash.com/photo-1505144808419-1957a94ca61e?q=80&w=1000&auto=format&fit=crop') center/cover;
-                    opacity: 0.4; z-index: 1;
-                }
-                #game-container {
-                    position: relative; z-index: 10;
-                    display: flex; flex-direction: column;
-                    height: 100%; width: 100%;
-                    align-items: center; justify-content: space-between;
-                    box-sizing: border-box; padding: 20px;
-                }
-                .score { font-size: 8vmin; font-weight: 900; color: #f9e076; text-shadow: 0 0 10px rgba(249,224,118,0.5); }
-                .pig-box { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; }
-                .pig { width: 70%; height: auto; object-fit: contain; }
-                
-                .ui-layer { width: 100%; display: flex; flex-direction: column; gap: 10px; padding-bottom: 20px; }
-                .question { text-align: center; font-weight: bold; font-size: 4vmin; min-height: 3em; display: flex; align-items: center; justify-content: center; }
-                
-                button {
-                    background: #f9e076; border: none; border-radius: 20px;
-                    padding: 12px; font-weight: bold; font-size: 4vmin;
-                    cursor: pointer; transition: transform 0.1s; width: 100%;
-                }
-                button:active { transform: scale(0.98); }
-                
-                /* Стили для падающих пиратских монет */
-                .coin {
-                    position: absolute; width: 8vmin; height: 8vmin;
-                    background: url('https://raw.githubusercontent.com/lindtjulia1-web/Sparschwein1/main/7.png') center/cover;
-                    z-index: 50; pointer-events: none;
-                }
-                @keyframes fall {
-                    to { transform: translateY(100vh) rotate(360deg); opacity: 0; }
-                }
-            </style>
-        </head>
-        <body>
-            <div class='bg'></div>
-            <div id='game-container'>
-                <div class='score' id='score'>0</div>
-                
-                <div class='pig-box'>
-                    <img id='pig-img' class='pig' src='https://raw.githubusercontent.com/lindtjulia1-web/Sparschwein1/main/1.png'>
-                </div>
-
-                <div class='ui-layer'>
-                    <div class='question' id='q-text'>Сокровища Пирата</div>
-                    <div id='btn-area' style='display: flex; flex-direction: column; gap: 10px; width: 80%; margin: 0 auto;'>
-                        <button onclick='startGame()'>В БОЙ</button>
-                    </div>
-                </div>
+<div style="width:100%; max-width:400px; margin:auto; aspect-ratio:400/600;">
+<div style="position:relative; width:100%; height:100%; border-radius:30px; box-shadow: 0 0 35px #f9e076; overflow:hidden; background:#000;">
+    <iframe srcdoc="
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body, html { margin:0; padding:0; height:100%; overflow:hidden; font-family: 'Segoe UI', sans-serif; background:transparent; }
+            #game { position:relative; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:space-between; box-sizing:border-box; 
+                    padding: 11vmin 5vmin; /* Верхний отступ 11, боковые 5 для баланса */ }
+            
+            /* Фон: Золотой песок */
+            .bg { position:absolute; inset:0; background:url('https://images.unsplash.com/photo-1505144808419-1957a94ca61e?q=80&w=1000') center/cover; opacity:0.3; z-index:1; }
+            
+            .ui { position:relative; z-index:10; width:100%; text-align:center; color:#fff; }
+            .score { font-size:10vmin; font-weight:900; color:#f9e076; text-shadow:0 0 15px rgba(249,224,118,0.7); }
+            
+            .pig-container { flex:1; display:flex; align-items:center; justify-content:center; width:100%; z-index:5; }
+            .pig { width:80%; height:auto; transition: transform 0.2s; }
+            
+            .bottom-ui { width:100%; z-index:10; display:flex; flex-direction:column; gap:1.5vmin; }
+            .question { font-size:4.5vmin; font-weight:bold; margin-bottom:2vmin; min-height:6vmin; }
+            
+            button { background:#f9e076; border:none; border-radius:30px; height:8vmin; width:100%; font-weight:bold; font-size:3.5vmin; cursor:pointer; color:#000; box-shadow:0 4px 0 #b39100; }
+            button:active { transform:translateY(2px); box-shadow:none; }
+            
+            /* Пиратские монеты */
+            .coin { position:absolute; width:8vmin; height:8vmin; background:url('https://raw.githubusercontent.com/lindtjulia1-web/Sparschwein1/main/7.png') center/cover; z-index:50; pointer-events:none; }
+            @keyframes drop { to { transform:translateY(110vh) rotate(720deg); opacity:0; } }
+        </style>
+    </head>
+    <body>
+        <div class='bg'></div>
+        <div id='game'>
+            <div class='ui score' id='score'>0</div>
+            
+            <div class='pig-container'>
+                <img id='pig' class='pig' src='https://raw.githubusercontent.com/lindtjulia1-web/Sparschwein1/main/1.png'>
             </div>
 
-            <script>
-                let score = 0;
-                const i18n = {
-                    ru: { start: 'В БОЙ', win: 'ЗОЛОТО ВАШЕ!', next: 'Далее' },
-                    en: { start: 'FIGHT', win: 'GOLD IS YOURS!', next: 'Next' },
-                    de: { start: 'KAMPF', win: 'GOLD GEHÖRT DIR!', next: 'Weiter' }
-                };
+            <div class='bottom-ui'>
+                <div class='question' id='q-text'>Сокровища Пирата</div>
+                <div id='btns' style='display:flex; flex-direction:column; gap:10px;'>
+                    <button onclick='start()'>В БОЙ</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            let balance = 0;
+            const lang = {
+                ru: { win: 'ЗОЛОТО ВАШЕ!', start: 'В БОЙ' },
+                en: { win: 'GOLD IS YOURS!', start: 'FIGHT' },
+                de: { win: 'GOLD GEHÖRT DIR!', start: 'KAMPF' }
+            };
+            let cur = 'ru';
+
+            function start() {
+                document.getElementById('q-text').innerText = 'Уровень 1: Кликни на свинью!';
+                render([{ t: 'ПОЛУЧИТЬ ЗОЛОТО', a: () => clickPig() }]);
+            }
+
+            function render(opts) {
+                const b = document.getElementById('btns');
+                b.innerHTML = '';
+                opts.forEach(o => {
+                    const btn = document.createElement('button');
+                    btn.innerText = o.t;
+                    btn.onclick = o.a;
+                    b.appendChild(btn);
+                });
+            }
+
+            function clickPig() {
+                balance += 50;
+                document.getElementById('score').innerText = balance;
+                spawnCoin();
                 
-                let currentLang = 'ru'; // Сюда можно передавать переменную из настроек
-
-                function startGame() {
-                    document.getElementById('q-text').innerText = 'Уровень 1: Готовы?';
-                    renderButtons([
-                        { text: 'Да', action: () => dropCoins(50) },
-                        { text: 'Нет', action: () => alert('Пираты не сдаются!') }
-                    ]);
+                if(balance >= 500) {
+                    document.getElementById('pig').src = 'https://raw.githubusercontent.com/lindtjulia1-web/Sparschwein1/main/gold_pig.png';
+                    document.getElementById('q-text').innerText = lang[cur].win;
+                    render([{ t: 'RESTART', a: () => location.reload() }]);
                 }
+            }
 
-                function renderButtons(options) {
-                    const area = document.getElementById('btn-area');
-                    area.innerHTML = '';
-                    options.forEach(opt => {
-                        const b = document.createElement('button');
-                        b.innerText = opt.text;
-                        b.onclick = opt.action;
-                        area.appendChild(b);
-                    });
+            function spawnCoin() {
+                for(let i=0; i<5; i++) {
+                    const c = document.createElement('div');
+                    c.className = 'coin';
+                    c.style.left = Math.random() * 80 + 10 + '%';
+                    c.style.top = '-10%';
+                    c.style.animation = `drop ${Math.random()*1 + 0.5}s ease-in forwards`;
+                    document.body.appendChild(c);
+                    setTimeout(() => c.remove(), 1500);
                 }
-
-                function dropCoins(amount) {
-                    score += amount;
-                    document.getElementById('score').innerText = score;
-                    for(let i=0; i<10; i++) {
-                        const coin = document.createElement('div');
-                        coin.className = 'coin';
-                        coin.style.left = Math.random() * 90 + '%';
-                        coin.style.top = '-10%';
-                        coin.style.animation = `fall ${Math.random()*1 + 1}s linear forwards`;
-                        document.body.appendChild(coin);
-                        setTimeout(() => coin.remove(), 2000);
-                    }
-                    if(score >= 500) {
-                        document.getElementById('pig-img').src = 'https://raw.githubusercontent.com/lindtjulia1-web/Sparschwein1/main/gold_pig.png'; // Условно
-                        document.getElementById('q-text').innerText = i18n[currentLang].win;
-                        renderButtons([{ text: 'RESTART', action: () => location.reload() }]);
-                    }
-                }
-            </script>
-        </body>
-        </html>" 
-        style="width: 100%; height: 100%; border: none;"></iframe>
-    </div>
+            }
+        </script>
+    </body>
+    </html>" 
+    style="width:100%; height:100%; border:none; display:block;"></iframe>
+</div>
 </div>
