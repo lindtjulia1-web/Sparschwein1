@@ -12,13 +12,13 @@
         h2 { color: var(--accent); font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; margin: 20px 0 10px; border-left: 3px solid var(--accent); padding-left: 10px; }
         h3 { font-size: 12px; color: #fff; margin: 15px 0 5px; opacity: 0.8; }
         
-        .card { background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 12px; border-radius: 15px; margin-bottom: 10px; position: relative; }
+        .card { background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 12px; border-radius: 0px; margin-bottom: 10px; position: relative; }
         .del-btn { position: absolute; top: 8px; right: 10px; color: var(--red); cursor: pointer; font-size: 10px; font-weight: bold; }
         
         label { display: block; font-size: 10px; color: #aaa; text-transform: uppercase; margin-top: 8px; }
-        input, select { width: 100%; background: #111; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 8px; margin-top: 4px; box-sizing: border-box; outline: none; font-size: 13px; }
+        input, select { width: 100%; background: #111; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px; margin-top: 4px; box-sizing: border-box; outline: none; font-size: 13px; }
         
-        .btn { border: none; padding: 14px; width: 100%; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
+        .btn { border: none; padding: 14px; width: 100%; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
         .btn-add { background: #444; color: #fff; font-size: 11px; padding: 8px; }
         .btn-main { background: #ffb347; color: #000; } 
         .btn-code { background: #77dd77; color: #000; } 
@@ -26,14 +26,14 @@
         .preview { flex: 1; background: #0c0c0e; display: flex; align-items: center; justify-content: center; padding: 40px; }
         #device-wrapper { 
             position: relative; 
-            overflow: visible; /* Чтобы свечение не обрезалось в превью */
+            overflow: visible; 
             transition: 0.3s; 
             background: #000;
         }
         iframe { width: 100%; height: 100%; border: none; display: block; }
         
         #code-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; }
-        textarea { width: 80%; height: 50%; background: #111; color: var(--accent); padding: 20px; border: 1px solid var(--accent); border-radius: 20px; font-family: monospace; }
+        textarea { width: 80%; height: 50%; background: #111; color: var(--accent); padding: 20px; border: 1px solid var(--accent); border-radius: 8px; font-family: monospace; }
         
         .color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         input[type="color"] { height: 35px; padding: 2px; cursor: pointer; }
@@ -52,9 +52,6 @@
         <input type="text" id="bg-url" placeholder="URL картинки">
 
         <h2>Эффекты Виджета</h2>
-        <label>Закругление углов</label>
-        <input type="range" id="borderRadius" min="0" max="100" value="30">
-        
         <label>Цвет Неонового Свечения</label>
         <input type="color" id="neon-color" value="#f9e076">
 
@@ -157,7 +154,6 @@ function buildInnerGame() {
         btnTxt: document.getElementById('start-btn-text').value,
         endTxt: document.getElementById('end-text').value,
         fz: document.getElementById('fontSize').value,
-        br: document.getElementById('borderRadius').value,
         ff: document.getElementById('fontFamily').value,
         btnCol: document.getElementById('btn-color').value,
         btnH: document.getElementById('btn-height').value,
@@ -176,13 +172,13 @@ function buildInnerGame() {
     <style>
         body { 
             margin:0; height:100vh; overflow:hidden; font-family:${cfg.ff}; background:#000; color:#fff; display:flex; flex-direction:column; 
-            border-radius:${cfg.br}px; position: relative; box-sizing: border-box;
-            border: 4px solid ${cfg.neon};
+            border-radius:0px; position: relative; box-sizing: border-box;
+            border: 5px solid ${cfg.neon};
             animation: neon-pulse 2s infinite ease-in-out;
         }
         @keyframes neon-pulse {
-            0%, 100% { box-shadow: inset 0 0 15px ${cfg.neon}, 0 0 15px ${cfg.neon}; border-color: ${cfg.neon}; }
-            50% { box-shadow: inset 0 0 30px ${cfg.neon}, 0 0 40px ${cfg.neon}; border-color: #fff; }
+            0%, 100% { box-shadow: inset 0 0 15px ${cfg.neon}, 0 0 20px ${cfg.neon}; border-color: ${cfg.neon}; }
+            50% { box-shadow: inset 0 0 30px ${cfg.neon}, 0 0 45px ${cfg.neon}; border-color: #fff; }
         }
         .bg { position:fixed; inset:0; background:url(${cfg.bg}) center/cover; opacity:0.5; z-index:-1; }
         #game { height:100%; display:flex; flex-direction:column; padding:${cfg.pv}vmin ${cfg.ph}vmin; box-sizing:border-box; }
@@ -195,9 +191,9 @@ function buildInnerGame() {
         .ui { min-height:30%; display:flex; flex-direction:column; justify-content:flex-end; align-items: center; z-index:10; }
         .q-text { width:100%; font-size:${cfg.fz}vmin; text-align:center; margin-bottom:2vmin; font-weight:bold; min-height:3em; display:flex; align-items:center; justify-content:center; }
         .btn-grid { display:grid; gap:${cfg.btnGap}vmin; width: 100%; justify-items: center; }
-        button { border:none; background:${cfg.btnCol}; color:#000; width:${cfg.btnW}%; height:${cfg.btnH}vmin; border-radius:${cfg.br}px; cursor:pointer; font-weight:bold; font-size:4vmin; transition: 0.2s; padding: 0; }
+        button { border:none; background:${cfg.btnCol}; color:#000; width:${cfg.btnW}%; height:${cfg.btnH}vmin; border-radius:0px; cursor:pointer; font-weight:bold; font-size:4vmin; transition: 0.2s; padding: 0; }
         button:hover { transform: scale(1.02); }
-        .screen { position:absolute; inset:0; background:rgba(0,0,0,0.9); z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:5vmin; border-radius:${cfg.br}px; }
+        .screen { position:absolute; inset:0; background:rgba(0,0,0,0.9); z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:5vmin; border-radius:0px; }
         #firework { position: absolute; inset: 0; pointer-events: none; z-index: 20; display: none; background: radial-gradient(circle, rgba(255,223,0,0.3) 0%, transparent 70%); animation: flash 0.5s infinite alternate; }
         @keyframes flash { from { opacity: 0.3; } to { opacity: 0.8; } }
         @keyframes fallIn { 0% { top:-20vh; opacity:1; transform: rotate(0deg) scale(1.2); } 100% { top: 50%; transform: rotate(360deg) scale(0.6); opacity: 0; } }
@@ -297,8 +293,7 @@ function getGeniallyCode() {
     const html = buildInnerGame().replace(/"/g, '&quot;');
     const w = document.getElementById('width').value;
     const h = document.getElementById('height').value;
-    // Чистый iframe с фиксированным размером
-    const code = `<iframe width="${w}" height="${h}" srcdoc="${html}" frameborder="0" scrolling="no" style="overflow:hidden; display:block;"></iframe>`;
+    const code = `<iframe width="${w}" height="${h}" srcdoc="${html}" frameborder="0" scrolling="no" style="overflow:hidden; display:block; border:none;"></iframe>`;
     document.getElementById('result-code').value = code;
     document.getElementById('code-modal').style.display = 'flex';
 }
