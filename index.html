@@ -166,7 +166,9 @@ function buildInnerGame() {
         neon: document.getElementById('neon-color').value,
         levels: levels,
         pigs: [GITHUB_RAW+"1.png", GITHUB_RAW+"2.png", GITHUB_RAW+"3.png", GITHUB_RAW+"4.png", GITHUB_RAW+"5.png", GITHUB_RAW+"6.png"],
-        coin: GITHUB_RAW+"7.png"
+        coin: GITHUB_RAW+"7.png",
+        sndCoin: GITHUB_RAW+"1.mp3",
+        sndWin: GITHUB_RAW+"2.mp3"
     };
 
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
@@ -215,6 +217,10 @@ function buildInnerGame() {
         let score = 0, currentLvl = 0, currentQ = 0, stake = 0;
         const cfg = ${JSON.stringify(cfg)};
         const labels = { ru: "СТАВКА:", en: "STAKE:", de: "EINSATZ:" };
+        
+        const audioCoin = new Audio(cfg.sndCoin);
+        const audioWin = new Audio(cfg.sndWin);
+
         function startGame() { document.getElementById('start-screen').style.display='none'; nextStep(); }
         function nextStep() {
             if(currentLvl >= cfg.levels.length) { finishGame(); return; }
@@ -252,6 +258,8 @@ function buildInnerGame() {
             });
         }
         function spawnCoins(num) {
+            audioCoin.currentTime = 0;
+            audioCoin.play().catch(e => console.log('Audio error'));
             for(let i=0; i<num; i++) {
                 setTimeout(() => {
                     const c = document.createElement('div'); c.className = 'falling-coin';
@@ -272,6 +280,7 @@ function buildInnerGame() {
         }
         function removeCoins(num) { const p = document.getElementById('pile'); for(let i=0; i<num; i++) if(p.lastChild) p.lastChild.remove(); }
         function finishGame() {
+            audioWin.play().catch(e => console.log('Audio error'));
             document.getElementById('pig-img').src = cfg.pigs[5];
             document.getElementById('firework').style.display = 'block';
             document.getElementById('q-label').innerText = cfg.endTxt;
