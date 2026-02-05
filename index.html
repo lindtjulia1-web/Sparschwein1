@@ -318,10 +318,10 @@ function buildInnerGame() {
                 c.style.background = 'url('+cfg.coin+') center/cover';
                 c.style.left = Math.random() * 100 + '%';
                 c.style.top = '-10vh';
-                c.style.animation = 'endRain ' + (1 + Math.random()) + 's linear forwards';
+                c.style.animation = 'endRain ' + (2.5 + Math.random() * 2) + 's linear forwards';
                 f.appendChild(c);
-                setTimeout(() => c.remove(), 2000);
-            }, 100);
+                setTimeout(() => c.remove(), 5000);
+            }, 50);
         }
     <\/script></body></html>`;
 }
