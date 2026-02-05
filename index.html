@@ -202,6 +202,8 @@ function buildInnerGame() {
         @keyframes flash { from { opacity: 0.3; } to { opacity: 0.8; } }
         @keyframes fallIn { 0% { top:-20vh; opacity:1; transform: rotate(0deg) scale(1.2); } 100% { top: 50%; transform: rotate(360deg) scale(0.6); opacity: 0; } }
         @keyframes rain { 0% { transform: translateY(-120vh) rotate(0deg); } 100% { transform: translateY(120vh) rotate(720deg); } }
+        
+        /* НОВАЯ АНИМАЦИЯ ПОКАЧИВАНИЯ */
         @keyframes happy-pig {
             0%, 100% { transform: rotate(0deg) scale(1); }
             25% { transform: rotate(-5deg) scale(1.05); }
@@ -304,27 +306,26 @@ function buildInnerGame() {
             p.appendChild(c);
         }
         function removeCoins(num) { const p = document.getElementById('pile'); for(let i=0; i<num; i++) if(p.lastChild) p.lastChild.remove(); }
+        
         function finishGame() {
             audioWin.play().catch(e => console.log('Audio error'));
             startCoinRain();
             const pig = document.getElementById('pig-img');
             pig.src = cfg.pigs[5];
-            pig.classList.add('pig-happy');
+            pig.classList.add('pig-happy'); // Добавляем покачивание
             document.getElementById('firework').style.display = 'block';
             document.getElementById('q-label').innerText = cfg.endTxt;
             document.getElementById('btn-area').innerHTML = '<button onclick="location.reload()">RESTART</button>';
         }
-    <\/script></body></html>`;
+    </script></body></html>`;
 }
 
 function updatePreview() {
     const wrapper = document.getElementById('device-wrapper');
     const w = document.getElementById('width').value;
     const h = document.getElementById('height').value;
-    
     wrapper.style.width = w + 'px';
     wrapper.style.height = h + 'px';
-    
     document.getElementById('ifr').srcdoc = buildInnerGame();
 }
 
@@ -332,4 +333,15 @@ function getGeniallyCode() {
     const html = buildInnerGame().replace(/"/g, '&quot;');
     const w = document.getElementById('width').value;
     const h = document.getElementById('height').value;
-    const code = `<iframe width="${w}" height="${h}" srcdoc="${html}" frameborder="0" scrolling="no" style="overflow:hidden; display:block; border:
+    const code = `<iframe width="${w}" height="${h}" srcdoc="${html}" frameborder="0" scrolling="no" style="overflow:hidden; display:block; border:none; border-radius:30px;"></iframe>`;
+    document.getElementById('result-code').value = code;
+    document.getElementById('code-modal').style.display = 'flex';
+}
+
+window.onload = () => {
+    addQ(1, "Уровень 1: Вопрос?", "Да", "Нет");
+    updatePreview();
+}
+</script>
+</body>
+</html>
