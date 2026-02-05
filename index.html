@@ -201,6 +201,7 @@ function buildInnerGame() {
         #firework { position: absolute; inset: 0; pointer-events: none; z-index: 20; display: none; background: radial-gradient(circle, rgba(255,223,0,0.3) 0%, transparent 70%); animation: flash 0.5s infinite alternate; }
         @keyframes flash { from { opacity: 0.3; } to { opacity: 0.8; } }
         @keyframes fallIn { 0% { top:-20vh; opacity:1; transform: rotate(0deg) scale(1.2); } 100% { top: 50%; transform: rotate(360deg) scale(0.6); opacity: 0; } }
+        @keyframes rain { 0% { transform: translateY(-120vh) rotate(0deg); } 100% { transform: translateY(120vh) rotate(720deg); } }
     </style></head><body>
         <div id="firework"></div>
         <div class="bg"></div>
@@ -270,6 +271,24 @@ function buildInnerGame() {
                 }, i * 150);
             }
         }
+        function startCoinRain() {
+            for(let i=0; i<60; i++) {
+                setTimeout(() => {
+                    const c = document.createElement('div');
+                    c.style.position = 'absolute';
+                    c.style.width = (5 + Math.random()*5) + 'vmin';
+                    c.style.height = c.style.width;
+                    c.style.background = 'url(' + cfg.coin + ') center/cover no-repeat';
+                    c.style.left = Math.random() * 100 + '%';
+                    c.style.top = '-10vh';
+                    c.style.zIndex = '150';
+                    c.style.pointerEvents = 'none';
+                    c.style.animation = 'rain ' + (3 + Math.random()*3) + 's linear forwards';
+                    document.body.appendChild(c);
+                    setTimeout(() => c.remove(), 6000);
+                }, i * 100);
+            }
+        }
         function addToPile() {
             const p = document.getElementById('pile'); const c = document.createElement('div');
             c.className = 'coin-element';
@@ -281,6 +300,7 @@ function buildInnerGame() {
         function removeCoins(num) { const p = document.getElementById('pile'); for(let i=0; i<num; i++) if(p.lastChild) p.lastChild.remove(); }
         function finishGame() {
             audioWin.play().catch(e => console.log('Audio error'));
+            startCoinRain();
             document.getElementById('pig-img').src = cfg.pigs[5];
             document.getElementById('firework').style.display = 'block';
             document.getElementById('q-label').innerText = cfg.endTxt;
