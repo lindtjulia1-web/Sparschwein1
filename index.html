@@ -166,7 +166,9 @@ function buildInnerGame() {
         neon: document.getElementById('neon-color').value,
         levels: levels,
         pigs: [GITHUB_RAW+"1.png", GITHUB_RAW+"2.png", GITHUB_RAW+"3.png", GITHUB_RAW+"4.png", GITHUB_RAW+"5.png", GITHUB_RAW+"6.png"],
-        coin: GITHUB_RAW+"7.png"
+        coin: GITHUB_RAW+"7.png",
+        sfxCoin: GITHUB_RAW+"1.mp3",
+        sfxFinal: GITHUB_RAW+"2.mp3"
     };
 
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
@@ -222,20 +224,30 @@ function buildInnerGame() {
 
         // --- AUDIO ENGINE ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playSfx(f, t, d, v=0.1) {
-            try {
-                const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-                o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-                g.gain.setValueAtTime(v, audioCtx.currentTime);
-                g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
-                o.connect(g); g.connect(audioCtx.destination);
-                o.start(); o.stop(audioCtx.currentTime + d);
-            } catch(e) {}
-        }
         const snd = {
-            coin: () => playSfx(900 + Math.random()*300, 'sine', 0.2, 0.05),
-            win: () => { playSfx(523, 'square', 0.1); setTimeout(()=>playSfx(659, 'square', 0.2), 100); },
-            fail: () => playSfx(120, 'sawtooth', 0.4, 0.15)
+            coin: () => {
+                const a = new Audio(cfg.sfxCoin);
+                a.volume = 0.4;
+                a.play().catch(()=>{});
+            },
+            final: () => {
+                const a = new Audio(cfg.sfxFinal);
+                a.loop = true;
+                a.volume = 0.5;
+                a.play().catch(()=>{});
+            },
+            playSynth: (f, t, d, v=0.1) => {
+                try {
+                    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+                    o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+                    g.gain.setValueAtTime(v, audioCtx.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.start(); o.stop(audioCtx.currentTime + d);
+                } catch(e) {}
+            },
+            win: function() { this.playSynth(523, 'square', 0.1); setTimeout(()=>this.playSynth(659, 'square', 0.2), 100); },
+            fail: function() { this.playSynth(120, 'sawtooth', 0.4, 0.15); }
         };
 
         function startGame() { 
@@ -307,6 +319,7 @@ function buildInnerGame() {
             document.getElementById('pig-img').src = cfg.pigs[5];
             document.getElementById('q-label').innerText = cfg.endTxt;
             document.getElementById('btn-area').innerHTML = '<button onclick="location.reload()" style="animation:none;">RESTART</button>';
+            snd.final();
             startRain();
         }
 
